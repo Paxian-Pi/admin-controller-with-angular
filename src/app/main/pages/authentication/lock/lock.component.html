@@ -1,0 +1,61 @@
+<div id="lock" fxLayout="column">
+
+    <div id="lock-form-wrapper" fxLayout="column" fxLayoutAlign="center center">
+
+        <div id="lock-form" [@animate]="{value:'*',params:{duration:'300ms',y:'100px'}}">
+
+            <div class="lock-form-header" fxLayout="column" fxLayoutAlign="center center"
+                 fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="start center">
+
+                <div class="avatar-container">
+                    <img class="avatar big" src="assets/images/avatars/Estes.jpg">
+                    <mat-icon class="s-32">lock</mat-icon>
+                </div>
+
+                <div>
+                    <div class="title">YOUR SESSION EXPIRED</div>
+                    <div class="subtitle">
+                        Click 'refresh' to continue, or logout!
+                    </div>
+                </div>
+
+            </div>
+
+            <form name="lockForm" [formGroup]="lockForm" novalidate>
+
+                <!-- <mat-form-field appearance="outline">
+                    <mat-label>Username</mat-label>
+                    <input matInput formControlName="username">
+                    <mat-icon matSuffix class="disabled-text">account_circle</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Password</mat-label>
+                    <input matInput formControlName="password">
+                    <mat-icon matSuffix class="secondary-text">vpn_key</mat-icon>
+                    <mat-error>
+                        Password is required
+                    </mat-error>
+                </mat-form-field> -->
+
+                <button mat-raised-button class="submit-button" color="accent" 
+                    aria-label="REFRESH" (click)='refresh()'>
+                    REFRESH
+                </button>
+                
+                <button mat-raised-button class="submit-button" color="accent" 
+                    aria-label="LOGOUT" [disabled]="logoutDisabled" #logoutBtn (click)='logoutEvent()'>
+                    LOGOUT
+                </button>
+
+            </form>
+
+            <div class="message">
+                <a class="disabled-text" [routerLink]="'/pages/auth/login-2'" (click)="logout()">Not {{ name }}? Switch Account</a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

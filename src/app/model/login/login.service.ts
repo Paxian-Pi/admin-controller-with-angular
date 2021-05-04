@@ -26,11 +26,11 @@ export class LoginService {
               private tokenService: TokenService) 
   {
 
-    this.loginUrl = 'http://localhost:8080/login';
-    // this.loginUrl = 'https://restaurant-rest-api.herokuapp.com/login';
+    // this.loginUrl = 'http://localhost:8080/login';
+    this.loginUrl = 'https://restaurant-rest-api.herokuapp.com/login';
 
-    this.baseUrl = 'http://localhost:8080/api/';
-    // this.baseUrl = 'https://restaurant-rest-api.herokuapp.com/api/';
+    // this.baseUrl = 'http://localhost:8080/api/';
+    this.baseUrl = 'https://restaurant-rest-api.herokuapp.com/api/';
   }
 
   public login(login: LoginModel): Observable<LoginModel> {

@@ -37,8 +37,8 @@ export class ProjectDashboardService implements Resolve<any>
      */
     constructor(private httpClient: HttpClient, private tokenService: TokenService ) { 
         this.date = new Date();
-        this.baseUrl = 'http://localhost:8080/api/';
-        // this.baseUrl = 'https://restaurant-rest-api.herokuapp.com/api/';
+        // this.baseUrl = 'http://localhost:8080/api/';
+        this.baseUrl = 'https://restaurant-rest-api.herokuapp.com/api/';
 
         this.token = localStorage.getItem('token');
         console.log(this.token);

@@ -119,29 +119,40 @@ export class LockComponent implements OnInit
                 // Drop this user
                 this.loginService.removeUser().subscribe(() => {
                     console.log('User deleted!');
+                }, 
+                error => {
+                    if (error.status === 403) {
+                        localStorage.setItem('delete_error', 'true');
+                    }
                 });
 
-                // Re-create the user with logged-in update
-                this.loginService.reCreateTeam({
-                    username: localStorage.getItem('username'),
-                    email: localStorage.getItem('email'),
-                    password: localStorage.getItem('password'),
-                    loggedIn: false,
-                    phone: localStorage.getItem('phone'),
-                    roles: localStorage.getItem('roles'),
-                    permissions: localStorage.getItem('permissions')
-                })
-                    .subscribe(updated => {
+                if (localStorage.getItem('delete_error') === 'true') {
+                    return;
+                }
+                else {
+                    // Re-create the user with logged-in update
+                    this.loginService.reCreateTeam({
+                        username: localStorage.getItem('username'),
+                        email: localStorage.getItem('email'),
+                        password: localStorage.getItem('password'),
+                        loggedIn: false,
+                        phone: localStorage.getItem('phone'),
+                        roles: localStorage.getItem('roles'),
+                        permissions: localStorage.getItem('permissions')
+                    })
+                        .subscribe(updated => {
 
-                        console.log('Re-created!');
-                        console.log(updated);
-                        console.log('User with Id "' + updated.id + '" has been logged out!');
+                            console.log('Re-created!');
+                            console.log(updated);
+                            console.log('User with Id "' + updated.id + '" has been logged out!');
 
-                        localStorage.setItem('id', updated.id);
+                            localStorage.setItem('id', updated.id);
+                            localStorage.removeItem('delete_error');
 
-                        // Navigate to dashboard on successful login
-                        this.router.navigate(['/pages/auth/login-2']);
-                    });
+                            // Navigate to dashboard on successful login
+                            this.router.navigate(['/pages/auth/login-2']);
+                        });
+                }
             }, 500);
         });
 

@@ -159,7 +159,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
         }
 
         // Drop this user
-        this.loginService.removeUser().subscribe((user) => {
+        this.loginService.removeUser().subscribe(() => {
             console.log('User deleted!');
         });
 

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { Team } from 'app/model/team/team';
 import { Login2Component } from 'app/main/pages/authentication/login-2/login-2.component';
 import { TokenService } from 'app/token/token.service';
+import { environment } from 'environments/environment';
 
 @Injectable()
 export class ProjectDashboardService implements Resolve<any>
@@ -26,8 +27,10 @@ export class ProjectDashboardService implements Resolve<any>
     header: any;
 
     httpOptions: any;
-    baseUrl: string;
     token: any;
+
+
+    appUrl = environment.baseUrl + 'api';
 
 
     /**
@@ -37,8 +40,6 @@ export class ProjectDashboardService implements Resolve<any>
      */
     constructor(private httpClient: HttpClient, private tokenService: TokenService ) { 
         this.date = new Date();
-        // this.baseUrl = 'http://localhost:8080/api/';
-        this.baseUrl = 'https://restaurant-rest-api.herokuapp.com/api/';
 
         this.token = localStorage.getItem('token');
         console.log(this.token);
@@ -47,14 +48,14 @@ export class ProjectDashboardService implements Resolve<any>
     public getTeamData(): Observable<any> {
         const httpOptions = { headers: new HttpHeaders().set('Authorization', localStorage.getItem('token')) };     
          
-        return this.httpClient.get<any>(this.baseUrl + 'team', httpOptions);
+        return this.httpClient.get<any>(this.appUrl + 'team', httpOptions);
     }
 
     public createTeam(team: Team) {
         const httpOptions = { headers: new HttpHeaders().set('Authorization', localStorage.getItem('token')) };
         console.log(team);
 
-        return this.httpClient.post<Team>(this.baseUrl + 'team/create', team, httpOptions);
+        return this.httpClient.post<Team>(this.appUrl + 'team/create', team, httpOptions);
     }
 
 

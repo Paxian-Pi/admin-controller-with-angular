@@ -16,21 +16,17 @@ import { environment } from 'environments/environment';
 export class LoginService {
 
   _httpOptions: any;
-  loginUrl: string;
-  appUrl: string;
   _id: string;
 
   token: any;
 
+  loginUrl = environment.baseUrl + 'login';
+  appUrl = environment.baseUrl + 'api';
+
   constructor(@Inject(LOCAL_STORAGE) private storage: StorageService, 
               private httpClient: HttpClient, 
               private tokenService: TokenService) 
-  {
-
-    this.loginUrl = environment.baseUrl + 'login';
-
-    this.appUrl = environment.baseUrl + 'api';
-  }
+  { }
 
   public login(login: LoginModel): Observable<LoginModel> {
     console.log(login);

@@ -30,7 +30,7 @@ export class ProjectDashboardService implements Resolve<any>
     token: any;
 
 
-    appUrl = environment.baseUrl + 'api';
+    appUrl = environment.baseUrl + 'api/';
 
 
     /**

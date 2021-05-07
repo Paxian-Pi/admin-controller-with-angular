@@ -182,9 +182,9 @@ export class FuseThemeOptionsComponent implements OnInit, OnDestroy
             this.isFooterHidden = false;
         }
 
-        setTimeout(() => {
-            this._resetFormValues('vertical-layout-1');
-        }, 5000);
+        // setTimeout(() => {
+        //     this._resetFormValues('vertical-layout-1');
+        // }, 5000);
     }
 
     saveThemeSettings() {

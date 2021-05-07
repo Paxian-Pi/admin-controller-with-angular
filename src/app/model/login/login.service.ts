@@ -21,7 +21,7 @@ export class LoginService {
   token: any;
 
   loginUrl = environment.baseUrl + 'login';
-  appUrl = environment.baseUrl + 'api';
+  appUrl = environment.baseUrl + 'api/';
 
   constructor(@Inject(LOCAL_STORAGE) private storage: StorageService, 
               private httpClient: HttpClient, 

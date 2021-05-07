@@ -4,7 +4,7 @@
   "license": "https://themeforest.net/licenses/terms/regular",
   "scripts": {
     "ng": "ng",
-    "heroku-postbuild": "ng build --prod && npm install -g http-server-spa",
+    "heroku-postbuild": "ng build --prod",
     "start": "node server.js",
     "start:mem": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng serve --open",
     "build": "ng build",
@@ -13,7 +13,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "bundle-report": "webpack-bundle-analyzer dist/stats.json"
+    "bundle-report": "webpack-bundle-analyzer dist/stats.json",
+    "postinstall": "ng build --aot -prod"
   },
   "engines": {
     "node": "12.18.2",

@@ -8,6 +8,7 @@ import { TokenService } from 'app/token/token.service';
 import { LOCAL_STORAGE, StorageService } from 'ngx-webstorage-service';
 import { Team } from '../team/team';
 import { id } from '@swimlane/ngx-charts';
+import { environment } from 'environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class LoginService {
 
   _httpOptions: any;
   loginUrl: string;
-  baseUrl: string;
+  appUrl: string;
   _id: string;
 
   token: any;
@@ -26,11 +27,9 @@ export class LoginService {
               private tokenService: TokenService) 
   {
 
-    // this.loginUrl = 'http://localhost:8080/login';
-    this.loginUrl = 'https://restaurant-rest-api.herokuapp.com/login';
+    this.loginUrl = environment.baseUrl + 'login';
 
-    // this.baseUrl = 'http://localhost:8080/api/';
-    this.baseUrl = 'https://restaurant-rest-api.herokuapp.com/api/';
+    this.appUrl = environment.baseUrl + 'api';
   }
 
   public login(login: LoginModel): Observable<LoginModel> {
@@ -41,13 +40,13 @@ export class LoginService {
   public reCreateTeam(team: Team): Observable<any> {
     const httpOptions = { headers: new HttpHeaders().set('Authorization', localStorage.getItem('token')) };
 
-    return this.httpClient.post<ConfirmLogin>(this.baseUrl + 'team/create', team, httpOptions);
+    return this.httpClient.post<ConfirmLogin>(this.appUrl + 'team/create', team, httpOptions);
   }
 
   public removeUser(): Observable<any> {
     const httpOptions = { headers: new HttpHeaders().set('Authorization', localStorage.getItem('token')) };
     const _id = localStorage.getItem('id');
 
-    return this.httpClient.delete(this.baseUrl + `team/delete/${_id}`, httpOptions);
+    return this.httpClient.delete(this.appUrl + `team/delete/${_id}`, httpOptions);
   }
 }

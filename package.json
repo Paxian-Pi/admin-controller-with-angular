@@ -7,12 +7,14 @@
     "heroku-postbuild": "ng build --prod && npm install -g http-server-spa",
     "start": "http-server-spa dist/fuse index.html $PORT",
     "start:mem": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng serve --open",
+    "build": "ng build",
     "build:prod": "ng build --prod",
     "build:prod:mem": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "bundle-report": "webpack-bundle-analyzer dist/stats.json"
+    "bundle-report": "webpack-bundle-analyzer dist/stats.json",
+    "dev": "lite-server"
   },
   "engines": {
     "node": "12.18.2",
@@ -25,6 +27,8 @@
     "@angular/cdk": "11.0.0",
     "@angular/cli": "11.0.0",
     "@angular/common": "11.0.0",
+    "@angular/compiler": "11.0.0",
+    "@angular/compiler-cli": "11.0.0",
     "@angular/core": "11.0.0",
     "@angular/flex-layout": "10.0.0-beta.32",
     "@angular/forms": "11.0.0",
@@ -67,6 +71,7 @@
     "prismjs": "1.22.0",
     "rxjs": "6.6.3",
     "tslib": "2.0.3",
+    "typescript": "4.0.5",
     "web-animations-js": "2.3.2",
     "zone.js": "0.10.3"
   },

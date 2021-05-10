@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, ViewEncapsulation, Injectable, Inject } f
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { FuseConfigService } from '@fuse/services/config.service';
@@ -12,6 +12,10 @@ import { ProjectDashboardService } from 'app/main/apps/dashboards/project/projec
 import { LoginService } from 'app/model/login/login.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { Token } from 'app/model/token/token';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from 'environments/environment';
+import { Login2Component } from '../login-2/login-2.component';
 
 @Injectable({
     providedIn: 'root'
@@ -32,6 +36,7 @@ export class Register2Component implements OnInit, OnDestroy
     userEmail: any;
     userName: any;
     token: any;
+    tokenId: any;
     isDisabledSubmitButton = false;
 
     emailMatch: boolean;
@@ -46,7 +51,8 @@ export class Register2Component implements OnInit, OnDestroy
         private loginService: LoginService,
         private router: Router,
         public dialog: MatDialog,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private loginComponent: Login2Component
     )
     {
         // Configure the layout
@@ -126,16 +132,14 @@ export class Register2Component implements OnInit, OnDestroy
     checkEmailMatchInDB() {
         // Check email match, against database
         const email = this.registerForm.value.email;
-        
-        
     }
 
     createTeam() {
 
-        const username = this.registerForm.value.name;
-        const email = this.registerForm.value.email;
-        const password = this.registerForm.value.password;
-        const phone = this.registerForm.value.phone;
+        const username = this.registerForm.value.name.trim();
+        const email = this.registerForm.value.email.trim();
+        const password = this.registerForm.value.password.trim();
+        const phone = this.registerForm.value.phone.trim();
 
         const capitalizeFirstLetter = username ? username.charAt(0).toUpperCase() + username.substr(1).toLowerCase() : '';
 
@@ -148,84 +152,86 @@ export class Register2Component implements OnInit, OnDestroy
                 this.token.push(res[key]);
             }
 
-            // Save token to local storage
-            localStorage.setItem('token', this.token);
+            // Save token to local storage (Deprecated)
+            localStorage.setItem('token', this.token[0]);
 
-            setTimeout(() => {
-                // Check email match in db
-                this._projectDashboardService.getTeamData().subscribe(data => {
+            // Save token to db
+            // this.loginService.postToken(this.token[0]).subscribe(authToken => {
+            //     console.log(authToken.id);
+            //     this.tokenId = authToken.id;
+            //     localStorage.setItem('token_id', this.tokenId);
+            // });
+        });
 
-                    for (const item of data) {
-                        this.userEmail = data.find((x: { email: any; }) => x.email === email);
-                        this.userName = data.find((x: { username: any; }) => x.username === capitalizeFirstLetter);
-                    }
+        // Check email match in db
+        this._projectDashboardService.getTeamData().subscribe(data => {
 
-                    if (this.userEmail !== undefined) {
-                        this.emailMatch = this.userEmail.email === email;
-                        console.log(this.emailMatch);
+            for (const item of data) {
+                this.userEmail = data.find((x: { email: any; }) => x.email === email);
+                this.userName = data.find((x: { username: any; }) => x.username === capitalizeFirstLetter);
+            }
 
-                        if (this.emailMatch) {
-                            this.isDisabledSubmitButton = true;
+            if (this.userEmail !== undefined) {
+                this.emailMatch = this.userEmail.email === email;
+                console.log(this.emailMatch);
 
-                            this.snackBar.open('This email "' + email + '" is already taken!', 'Ok').onAction().subscribe(() => {
-                                this.registerForm.patchValue({ email: '' });
-                                this.isDisabledSubmitButton = false;
-                            });
-                        }
-                    }
-                    else if (this.userName !== undefined) {
+                if (this.emailMatch) {
+                    this.isDisabledSubmitButton = true;
 
-                        if (this.userName.username === capitalizeFirstLetter) {
-                            this.isDisabledSubmitButton = true;
+                    this.snackBar.open('This email "' + email + '" is already taken!', 'Ok').onAction().subscribe(() => {
+                        this.registerForm.patchValue({ email: '' });
+                        this.isDisabledSubmitButton = false;
+                    });
+                }
+            }
+            else if (this.userName !== undefined) {
 
-                            this.snackBar.open('Username "' + username + '" is in use by another account!', 'Ok').onAction().subscribe(() => {
-                                this.registerForm.patchValue({ name: '' });
-                                this.isDisabledSubmitButton = false;
-                            });
-                        }
-                    }
-                    else {
-                        // Check password match
-                        localStorage.setItem('passwordCheck', password);
+                if (this.userName.username === capitalizeFirstLetter) {
+                    this.isDisabledSubmitButton = true;
 
-                        // Prevent authorization error by ensuring valid token, while registering!
-                        localStorage.setItem('registering', 'true');
+                    this.snackBar.open('Username "' + username + '" is in use by another account!', 'Ok').onAction().subscribe(() => {
+                        this.registerForm.patchValue({ name: '' });
+                        this.isDisabledSubmitButton = false;
+                    });
+                }
+            }
+            else {
+                // Check password match
+                localStorage.setItem('passwordCheck', password);
 
-                        // Create new user
-                        this._projectDashboardService.createTeam({
-                            username: capitalizeFirstLetter,
-                            email: email,
-                            password: password,
-                            loggedIn: false,
-                            phone: phone,
-                            roles: this.selectedRole,
-                            permissions: this.permissions
-                        })
-                            .subscribe(dataObj => {
-                                console.log(dataObj);
+                // Prevent authorization error by ensuring valid token, while registering!
+                localStorage.setItem('registering', 'true');
 
-                                localStorage.removeItem('name');
-                                localStorage.removeItem('password');
-                                localStorage.setItem('createdIncomplete', 'true');
+                // Create new user
+                this._projectDashboardService.createTeam({
+                    username: capitalizeFirstLetter,
+                    email: email,
+                    password: password,
+                    loggedIn: false,
+                    phone: phone,
+                    roles: this.selectedRole,
+                    permissions: this.permissions
+                })
+                    .subscribe(dataObj => {
+                        console.log(dataObj);
 
-                                this.isDisabledSubmitButton = true;
+                        localStorage.removeItem('name');
+                        localStorage.removeItem('password');
+                        localStorage.setItem('createdIncomplete', 'true');
 
-                                this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
-                                    // Navigate to login
-                                    this.router.navigate(['/pages/auth/login-2']);
-                                    localStorage.setItem('accountCreated', 'true');
-                                    localStorage.removeItem('registering');
-                                    localStorage.removeItem('createdIncomplete');
-                                });
-                            }, error => {
-                                this.snackBar.open('Error: Please, try again!', 'Ok', { duration: 10000 });
-                                // setTimeout(() => {
-                                //     this.router.navigate(['/pages/auth/login-2']);
-                                // }, 2000);
-                            });
-                    }
-                });
-            }, 500);
+                        this.isDisabledSubmitButton = true;
+
+                        this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
+                            // Navigate to login
+                            this.router.navigate(['/pages/auth/login-2']);
+                            localStorage.setItem('accountCreated', 'true');
+                            localStorage.removeItem('registering');
+                            localStorage.removeItem('createdIncomplete');
+                        });
+                    }, error => {
+                        this.snackBar.open('Error: Please, try again!', 'Ok', { duration: 10000 });
+                    });
+            }
         });
     }
 }

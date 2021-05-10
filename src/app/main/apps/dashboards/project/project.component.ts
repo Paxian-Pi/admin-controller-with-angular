@@ -249,7 +249,8 @@ export class ProjectDashboardComponent implements OnInit
                 }
                 
                 this.teams = data;
-                this.numberOfStaff = data.length;
+                if (data.length < 1) { this.numberOfStaff = 0; }
+                else { this.numberOfStaff = data.length; }
                 console.log(this.teams);
             }, 
             error => {
@@ -259,12 +260,6 @@ export class ProjectDashboardComponent implements OnInit
                     }, 3000);
                 }
             });
-            
-        setInterval(() => {
-            if (localStorage.getItem('token_expiration_timer') === 'started') {
-
-            }
-        }, 900000);
     }
 
     onInputChange(event: any) {

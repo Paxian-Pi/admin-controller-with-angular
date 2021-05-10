@@ -11,6 +11,9 @@ import { TokenService } from 'app/token/token.service';
 import { Observable } from 'rxjs';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from 'environments/environment';
+import { Token } from 'app/model/token/token';
 
 @Component({
     selector     : 'login-2',
@@ -27,6 +30,7 @@ export class Login2Component implements OnInit
 {
     loginForm: FormGroup;
     token: any;
+    tokenId: any;
     nameUpperCase: string;
     newUser: any;
     user: any;
@@ -34,6 +38,8 @@ export class Login2Component implements OnInit
     checkBoxValue: any;
 
     auth: string;
+
+    appUrl = environment.baseUrl + 'api/';
 
     /**
      * Constructor
@@ -49,7 +55,8 @@ export class Login2Component implements OnInit
         private _projectDashboardService: ProjectDashboardService,
         private router: Router,
         private tokenService: TokenService,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private httpClient: HttpClient,
     )
     {
         // Configure the layout
@@ -116,11 +123,23 @@ export class Login2Component implements OnInit
             for (const key in loginRez) {
                 this.token.push(loginRez[key]);
             }
+            console.log('New auto-generated token:\n' + JSON.stringify(this.token[0]));
 
-            // Save token to local storage
-            localStorage.setItem('token', this.token);
-            localStorage.setItem('auto_token_expiration_timer', 'started');
-            console.log('New auto generated token:\n' + JSON.stringify(this.token));
+            // // Delete expired token
+            // this._projectDashboardService.deleteToken().subscribe((_id) => {
+            //     console.log(`Old token with id "${_id.id}", deleted!`);
+            // });
+
+            // // Push token to db
+            // this.loginService.postToken({ token: this.token[0] }).subscribe(authToken => {
+            //     this.tokenId = authToken.id;
+
+            //     console.log('New token Id: ' + JSON.stringify(this.tokenId));
+            //     localStorage.setItem('token_id', this.tokenId);
+            // });
+
+            // Save token to local storage (Deprecated)
+            localStorage.setItem('token', this.token[0]);
 
             // Check if registration was completed or not
             if (localStorage.getItem('registering') === 'true') {
@@ -152,7 +171,7 @@ export class Login2Component implements OnInit
                     return;
                 }
 
-                console.log(this.newUser.id);
+                console.log('User Id: ' + JSON.stringify(this.newUser.id));
                 console.log('Logged-in: ' + this.newUser.loggedIn);
 
                 // Save this user 'id' to local storage!
@@ -181,8 +200,8 @@ export class Login2Component implements OnInit
 
     login() {
         // Login with registered username and password
-        const name = this.loginForm.value.username;
-        const password = this.loginForm.value.password;
+        const name = this.loginForm.value.username.trim();
+        const password = this.loginForm.value.password.trim();
 
         const capitalizeUsername = name ? name.charAt(0).toUpperCase() + name.substr(1).toLowerCase() : '';
 
@@ -205,12 +224,21 @@ export class Login2Component implements OnInit
                 this.token.push(res[key]);
             }
 
-            // Save token to local storage
-            localStorage.setItem('token', this.token);
-            localStorage.setItem('token_expiration_timer', 'started');
+            // Delete expired token
+            // this._projectDashboardService.deleteToken().subscribe((_id) => {
+            //     console.log(`Old token with id "${_id.id}", deleted!`);
+            // });
 
-            // Remove auto token-expiration timer
-            localStorage.removeItem('auto_token_expiration_timer');
+            // Push new token to db
+            // this.loginService.postToken({ token: this.token[0] }).subscribe(authToken => {
+            //     this.tokenId = authToken;
+
+            //     console.log('New token Id: ' + JSON.stringify(this.tokenId));
+            //     localStorage.setItem('token_id', this.tokenId);
+            // });
+
+            // Save token to local storage (Deprecated)
+            localStorage.setItem('token', this.token[0]);
             
             // Get current user's data
             this._projectDashboardService.getTeamData().subscribe(userArray => {
@@ -276,10 +304,6 @@ export class Login2Component implements OnInit
         localStorage.removeItem('passwordCheck');
         localStorage.removeItem('accountCreated');
         localStorage.removeItem('auto_token_expiration_timer');
-    }
-
-    getToken() {
-        return localStorage.getItem('token');
     }
 
     toggle(event: boolean) {

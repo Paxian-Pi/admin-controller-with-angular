@@ -11,6 +11,8 @@ import { navigation } from 'app/navigation/navigation';
 import { Router } from '@angular/router';
 import { LoginService } from 'app/model/login/login.service';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogComponent } from 'app/dialog/alert-dialog/dialog.component';
 
 @Component({
     selector     : 'toolbar',
@@ -44,6 +46,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
      * @param {TranslateService} _translateService
      */
     constructor(
+        public dialog: MatDialog,
         private _fuseConfigService: FuseConfigService,
         private _fuseSidebarService: FuseSidebarService,
         private _translateService: TranslateService,
@@ -151,6 +154,18 @@ export class ToolbarComponent implements OnInit, OnDestroy
     /**
      * Logout
      */
+
+    logoutDialog() {
+        const dialogRef = this.dialog.open(DialogComponent, {
+            width: '400px',
+            data: { title: 'Confirmation!', message: 'Do you want to logged out?' }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result === true) { this.logout(); }
+        });
+    }
+    
     logout(): void {
 
         if (localStorage.getItem('authStatus') === 'tokenError') {
@@ -161,7 +176,15 @@ export class ToolbarComponent implements OnInit, OnDestroy
         // Drop this user
         this.loginService.removeUser().subscribe(() => {
             console.log('User deleted!');
+        }, error => {
+            if (error.status === 500) {
+                localStorage.setItem('server_error', 'true');
+            }
         });
+
+        if (localStorage.getItem('server_error') === 'true') {
+            return;
+        }
 
         // Re-create the user with logged-in update
         this.loginService.reCreateTeam({
@@ -179,12 +202,15 @@ export class ToolbarComponent implements OnInit, OnDestroy
                 console.log('User with Id "' + updated.id + '" has been logged out!');
 
                 localStorage.setItem('id', updated.id);
+                localStorage.removeItem('server_error');
 
                 // Navigate to dashboard on successful login
                 this.router.navigate(['/pages/auth/login-2']);
+            }, error => {
+                if (error.status === 500) {
+                    this.logout();
+                }
             });
-
-        localStorage.removeItem('token_expiration_timer');
     }
 
     /**

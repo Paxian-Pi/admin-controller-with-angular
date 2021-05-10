@@ -8,10 +8,14 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class DialogComponent implements OnInit {
 
-  dialogTitle: string;
+  title: string;
+  message: any;
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { name: string }) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { title: string, message: string }) { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.title = this.data.title;
+    this.message = this.data.message;
+  }
 
 }

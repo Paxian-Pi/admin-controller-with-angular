@@ -3,9 +3,9 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Team } from 'app/model/team/team';
-import { Login2Component } from 'app/main/pages/authentication/login-2/login-2.component';
 import { TokenService } from 'app/token/token.service';
 import { environment } from 'environments/environment';
+import { Token } from 'app/model/token/token';
 
 @Injectable()
 export class ProjectDashboardService implements Resolve<any>
@@ -28,8 +28,9 @@ export class ProjectDashboardService implements Resolve<any>
 
     httpOptions: any;
     token: any;
+    tokenId: any;
 
-
+    tokenData: any;
     appUrl = environment.baseUrl + 'api/';
 
 
@@ -38,24 +39,51 @@ export class ProjectDashboardService implements Resolve<any>
      *
      * @param {HttpClient} httpClient
      */
-    constructor(private httpClient: HttpClient, private tokenService: TokenService ) { 
+    constructor(private httpClient: HttpClient) {
         this.date = new Date();
-
-        this.token = localStorage.getItem('token');
-        console.log(this.token);
     }
 
-    public getTeamData(): Observable<any> {
-        const httpOptions = { headers: new HttpHeaders().set('Authorization', localStorage.getItem('token')) };     
-         
-        return this.httpClient.get<any>(this.appUrl + 'team', httpOptions);
+    // Push this token to db for reference
+    public postToken(token: Token): Observable<any> {
+        return this.httpClient.post<Token>(this.appUrl + 'token', token);
     }
 
+    // Get token from db
+    public getToken(): Observable<any> {
+        return this.httpClient.get<any>(this.appUrl + 'token');
+    }
+
+    // Delete token from db
+    public deleteToken(): Observable<any> {
+        return this.httpClient.delete(this.appUrl + `token/delete/${localStorage.getItem('token_id')}`);
+    }
+
+    // Create new user
     public createTeam(team: Team) {
-        const httpOptions = { headers: new HttpHeaders().set('Authorization', localStorage.getItem('token')) };
         console.log(team);
 
-        return this.httpClient.post<Team>(this.appUrl + 'team/create', team, httpOptions);
+        return this.httpClient.post<Team>(this.appUrl + 'team/create', team);
+    }
+
+    // Get users from db
+    public getTeamData(): Observable<any> {
+
+        // Get new token
+        // this.getToken().subscribe(res => {
+        //     for (const item of res) {
+        //         this.tokenData = res.find((x: { id: any; }) => x.id === localStorage.getItem('token_id'));
+        //     }
+        //     if (this.tokenData === undefined) {
+        //         return;
+        //     }
+        //     localStorage.setItem('token_id', this.tokenData.id);
+        //     const token = this.tokenData.token;
+        // });
+         
+        const token = localStorage.getItem('token');
+        console.log(token);
+        const httpOptions = { headers: new HttpHeaders().set('Authorization', token) };
+        return this.httpClient.get<any>(this.appUrl + 'team', httpOptions);
     }
 
 

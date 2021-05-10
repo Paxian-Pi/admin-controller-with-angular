@@ -77,6 +77,14 @@ export class LockComponent implements OnInit
             ],
             password: ['', Validators.required]
         });
+        
+        if (localStorage.getItem('authTokenError') === 'true') {
+            this.logoutDisabled = true;
+            this.snackBar.open('Session expired! Refresh before login out...', 'Refresh', { duration: 5000 })
+                .onAction().subscribe(() => {
+                    this.refresh();
+                });
+        }
     }
     
     refresh() {

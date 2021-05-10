@@ -260,6 +260,8 @@ export class ProjectDashboardComponent implements OnInit
                     }, 3000);
                 }
             });
+
+        localStorage.removeItem('authTokenError');
     }
 
     onInputChange(event: any) {

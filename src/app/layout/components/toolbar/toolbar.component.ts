@@ -165,10 +165,12 @@ export class ToolbarComponent implements OnInit, OnDestroy
             if (result === true) { this.logout(); }
         });
     }
-    
+
     logout(): void {
 
         if (localStorage.getItem('authStatus') === 'tokenError') {
+            localStorage.setItem('authTokenError', 'true');
+            
             this.router.navigate(['/pages/auth/lock']);
             return;
         }

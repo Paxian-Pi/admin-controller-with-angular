@@ -7,6 +7,7 @@ import { LoginService } from 'app/model/login/login.service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
+import { Shared } from 'app/shared-pref/shared';
 
 @Component({
     selector     : 'lock',
@@ -59,8 +60,7 @@ export class LockComponent implements OnInit
             }
         };
 
-        this.name = localStorage.getItem('username');
-        localStorage.removeItem('auto_token_expiration_timer');
+        this.name = localStorage.getItem(Shared.username);
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ export class LockComponent implements OnInit
             password: ['', Validators.required]
         });
         
-        if (localStorage.getItem('authTokenError') === 'true') {
+        if (localStorage.getItem(Shared.authTokenError) === 'true') {
             this.isShown = false;
             this.logoutDisabled = true;
             this.snackBar.open('Session expired! You need to refresh before logging out...', 'Refresh', { duration: 5000 })
@@ -93,7 +93,7 @@ export class LockComponent implements OnInit
     }
     
     refresh() {
-        localStorage.setItem('refreshCliked', 'true');
+        localStorage.setItem(Shared.refreshCliked, 'true');
         setTimeout(() => {
             this.router.navigate(['/pages/auth/login-2']);
         }, 500);
@@ -128,7 +128,7 @@ export class LockComponent implements OnInit
             }
 
             // Save token to local storage
-            localStorage.setItem('token', this.token[0]);
+            localStorage.setItem(Shared.token, this.token[0]);
 
             // Get invalid user!
             this._projectDashboardService.getTeamData().subscribe(data => {
@@ -141,20 +141,20 @@ export class LockComponent implements OnInit
 
             // Re-create the user with logged-in update
             this.loginService.reCreateTeam({
-                username: localStorage.getItem('username'),
-                email: localStorage.getItem('email'),
-                password: localStorage.getItem('password'),
+                username: localStorage.getItem(Shared.username),
+                email: localStorage.getItem(Shared.email),
+                password: localStorage.getItem(Shared.password),
                 loggedIn: false,
-                phone: localStorage.getItem('phone'),
-                roles: localStorage.getItem('roles'),
-                permissions: localStorage.getItem('permissions')
+                phone: localStorage.getItem(Shared.phone),
+                roles: localStorage.getItem(Shared.roles),
+                permissions: localStorage.getItem(Shared.permissions)
             })
                 .subscribe((updated) => {
                     console.log('Re-created!');
                     console.log(updated);
                     console.log('User with Id "' + updated.id + '" has been logged out!');
 
-                    localStorage.setItem('id', updated.id);
+                    localStorage.setItem(Shared.userId, updated.id);
                 }, error => {
                     if (error.status === 403 || error.status === 500) {
                         localStorage.setItem('server_error', 'true');
@@ -183,7 +183,7 @@ export class LockComponent implements OnInit
                 // Call the 'removeUser' function again!
                 if (this.invalidUser[0].loggedIn === true) {
                     localStorage.setItem('id', this.invalidUser[0].id);
-                    
+
                     this.loginService.removeUser().subscribe(() => {
                         localStorage.removeItem('invalid_user_not_deleted');
 

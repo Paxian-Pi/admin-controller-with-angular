@@ -16,6 +16,7 @@ import { Team } from 'app/model/team/team';
 import { LoginService } from 'app/model/login/login.service';
 import { Router } from '@angular/router';
 import { DialogComponent } from 'app/dialog/alert-dialog/dialog.component';
+import { Shared } from 'app/shared-pref/shared';
 
 @Component({
     selector     : 'project-dashboard',
@@ -180,7 +181,7 @@ export class ProjectDashboardComponent implements OnInit
             curve         : shape.curveBasis
         };
 
-        localStorage.removeItem('authStatus');  // From toolbar component
+        localStorage.removeItem(Shared.authStatus);  // From toolbar component
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -249,8 +250,7 @@ export class ProjectDashboardComponent implements OnInit
                 }
                 
                 this.teams = data;
-                if (data.length < 1) { this.numberOfStaff = 0; }
-                else { this.numberOfStaff = data.length; }
+                this.numberOfStaff = data.length;
                 console.log(this.teams);
             }, 
             error => {
@@ -261,7 +261,7 @@ export class ProjectDashboardComponent implements OnInit
                 }
             });
 
-        localStorage.removeItem('authTokenError');
+        localStorage.removeItem(Shared.authTokenError);
     }
 
     onInputChange(event: any) {

@@ -13,6 +13,7 @@ import { LoginService } from 'app/model/login/login.service';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from 'app/dialog/alert-dialog/dialog.component';
+import { Shared } from 'app/shared-pref/shared';
 
 @Component({
     selector     : 'toolbar',
@@ -125,14 +126,14 @@ export class ToolbarComponent implements OnInit, OnDestroy
         // Set the selected language from default languages
         this.selectedLanguage = _.find(this.languages, {id: this._translateService.currentLang});
 
-        this.username = localStorage.getItem('username');
+        this.username = localStorage.getItem(Shared.username);
         setInterval(() => {
             this._projectDashboardService.getTeamData().subscribe(data => {
                 console.log(data);
 
             }, error => {
                 if (error.status === 403) {
-                    localStorage.setItem('authStatus', 'tokenError');
+                    localStorage.setItem(Shared.authStatus, 'tokenError');
                 }
             });
         }, 300000);
@@ -174,8 +175,8 @@ export class ToolbarComponent implements OnInit, OnDestroy
 
     logout(): void {
 
-        if (localStorage.getItem('authStatus') === 'tokenError') {
-            localStorage.setItem('authTokenError', 'true');
+        if (localStorage.getItem(Shared.authStatus) === 'tokenError') {
+            localStorage.setItem(Shared.authTokenError, 'true');
             
             this.router.navigate(['/pages/auth/lock']);
             return;
@@ -192,20 +193,20 @@ export class ToolbarComponent implements OnInit, OnDestroy
 
         // Re-create the user with logged-in update
         this.loginService.reCreateTeam({
-            username: localStorage.getItem('username'),
-            email: localStorage.getItem('email'),
-            password: localStorage.getItem('password'),
+            username: localStorage.getItem(Shared.username),
+            email: localStorage.getItem(Shared.email),
+            password: localStorage.getItem(Shared.password),
             loggedIn: false,
-            phone: localStorage.getItem('phone'),
-            roles: localStorage.getItem('roles'),
-            permissions: localStorage.getItem('permissions')
+            phone: localStorage.getItem(Shared.phone),
+            roles: localStorage.getItem(Shared.roles),
+            permissions: localStorage.getItem(Shared.permissions)
         })
         .subscribe((updated) => {
             console.log('Re-created!');
             console.log(updated);
             console.log('User with Id "' + updated.id + '" has been logged out!');
 
-            localStorage.setItem('id', updated.id);
+            localStorage.setItem(Shared.userId, updated.id);
         }, error => {
             if (error.status === 403 || error.status === 500) {
                 localStorage.setItem('server_error', 'true');
@@ -233,7 +234,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
         if (localStorage.getItem('invalid_user_not_deleted') === 'true') {
             // Call the 'removeUser' function again!
             if (this.invalidUser[0].loggedIn === true) {
-                localStorage.setItem('id', this.invalidUser[0].id);
+                localStorage.setItem(Shared.userId, this.invalidUser[0].id);
 
                 this.loginService.removeUser().subscribe(() => {
                     localStorage.removeItem('invalid_user_not_deleted');

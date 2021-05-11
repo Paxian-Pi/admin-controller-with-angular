@@ -16,6 +16,7 @@ import { Token } from 'app/model/token/token';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Login2Component } from '../login-2/login-2.component';
+import { Shared } from 'app/shared-pref/shared';
 
 @Injectable({
     providedIn: 'root'
@@ -75,17 +76,6 @@ export class Register2Component implements OnInit, OnDestroy
 
         // Set the private defaults
         this._unsubscribeAll = new Subject();
-
-        if (localStorage.getItem('createdIncomplete') === 'true') {
-
-            this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
-                // Navigate to login
-                this.router.navigate(['/pages/auth/login-2']);
-                localStorage.setItem('accountCreated', 'true');
-                localStorage.removeItem('registering');
-                localStorage.removeItem('createdIncomplete');
-            });
-        }
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -112,6 +102,17 @@ export class Register2Component implements OnInit, OnDestroy
             .subscribe(() => {
                 this.registerForm.get('passwordConfirm').updateValueAndValidity();
             });
+
+        if (localStorage.getItem('createdIncomplete') === 'true') {
+
+            this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
+                // Navigate to login
+                this.router.navigate(['/pages/auth/login-2']);
+                localStorage.setItem('accountCreated', 'true');
+                localStorage.removeItem('registering');
+                localStorage.removeItem('createdIncomplete');
+            });
+        }
     }
 
     /**
@@ -153,7 +154,7 @@ export class Register2Component implements OnInit, OnDestroy
             }
 
             // Save token to local storage (Deprecated)
-            localStorage.setItem('token', this.token[0]);
+            localStorage.setItem(Shared.token, this.token[0]);
 
             // Save token to db
             // this.loginService.postToken(this.token[0]).subscribe(authToken => {
@@ -212,25 +213,26 @@ export class Register2Component implements OnInit, OnDestroy
                     roles: this.selectedRole,
                     permissions: this.permissions
                 })
-                    .subscribe(dataObj => {
-                        console.log(dataObj);
+                .subscribe(dataObj => {
+                    console.log(dataObj);
 
-                        localStorage.removeItem('name');
-                        localStorage.removeItem('password');
-                        localStorage.setItem('createdIncomplete', 'true');
+                    localStorage.removeItem('name');
+                    localStorage.removeItem('password');
+                    localStorage.setItem('createdIncomplete', 'true');
 
-                        this.isDisabledSubmitButton = true;
+                    this.isDisabledSubmitButton = true;
 
-                        this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
-                            // Navigate to login
-                            this.router.navigate(['/pages/auth/login-2']);
-                            localStorage.setItem('accountCreated', 'true');
-                            localStorage.removeItem('registering');
-                            localStorage.removeItem('createdIncomplete');
-                        });
-                    }, error => {
-                        this.snackBar.open('Error: Please, try again!', 'Ok', { duration: 10000 });
+                    this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
+                        // Navigate to login
+                        this.router.navigate(['/pages/auth/login-2']);
+                        localStorage.setItem('accountCreated', 'true');
+                        localStorage.removeItem('registering');
+                        localStorage.removeItem('createdIncomplete');
                     });
+                }, 
+                error => {
+                    this.snackBar.open('Error: Please, try again!', 'Ok', { duration: 10000 });
+                });
             }
         });
     }

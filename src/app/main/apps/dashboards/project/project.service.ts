@@ -7,6 +7,8 @@ import { TokenService } from 'app/token/token.service';
 import { environment } from 'environments/environment';
 import { Token } from 'app/model/token/token';
 
+const appUrl = environment.baseUrl + 'api/';
+
 @Injectable()
 export class ProjectDashboardService implements Resolve<any>
 {
@@ -31,7 +33,6 @@ export class ProjectDashboardService implements Resolve<any>
     tokenId: any;
 
     tokenData: any;
-    appUrl = environment.baseUrl + 'api/';
 
 
     /**
@@ -45,31 +46,31 @@ export class ProjectDashboardService implements Resolve<any>
 
     // Push this token to db for reference
     public postToken(token: Token): Observable<any> {
-        return this.httpClient.post<Token>(this.appUrl + 'token', token);
+        return this.httpClient.post<Token>(appUrl + 'token', token);
     }
 
     // Get token from db
     public getToken(): Observable<any> {
-        return this.httpClient.get<any>(this.appUrl + 'token');
+        return this.httpClient.get<any>(appUrl + 'token');
     }
 
     // Delete token from db
     public deleteToken(): Observable<any> {
-        return this.httpClient.delete(this.appUrl + `token/delete/${localStorage.getItem('token_id')}`);
+        return this.httpClient.delete(appUrl + `token/delete/${localStorage.getItem('token_id')}`);
     }
 
     // Create new user
     public createTeam(team: Team) {
         console.log(team);
 
-        return this.httpClient.post<Team>(this.appUrl + 'team/create', team);
+        return this.httpClient.post<Team>(appUrl + 'team/create', team);
     }
 
     // Get users from db
     public getTeamData(): Observable<any> {         
         const token = localStorage.getItem('token');
         const httpOptions = { headers: new HttpHeaders().set('Authorization', token) };
-        return this.httpClient.get<any>(this.appUrl + 'team', httpOptions);
+        return this.httpClient.get<any>(appUrl + 'team', httpOptions);
     }
 
 

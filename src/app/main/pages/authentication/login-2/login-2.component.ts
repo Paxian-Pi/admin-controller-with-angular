@@ -14,6 +14,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from 'environments/environment';
 import { Token } from 'app/model/token/token';
+import { Shared } from 'app/shared-pref/shared';
+import { controllers } from 'chart.js';
 
 @Component({
     selector     : 'login-2',
@@ -92,8 +94,13 @@ export class Login2Component implements OnInit
             password: ['', Validators.required]
         });
 
-        const upperCase = localStorage.getItem('username') + '\'S KITCHEN!';
-        this.nameUpperCase = upperCase ? upperCase.toUpperCase() : '';
+        const upperCase = `${localStorage.getItem(Shared.username)} ${localStorage.getItem(Shared.roles)}`;
+        if (upperCase === 'null null') {
+            this.nameUpperCase = 'ADMIN CONTROLLER';
+        }
+        else {
+            this.nameUpperCase = upperCase ? upperCase.toUpperCase() : '';
+        }
 
         this.checkBoxValue = localStorage.getItem('checkBox');
         this.loginForm.value.username = localStorage.getItem('name');
@@ -139,7 +146,7 @@ export class Login2Component implements OnInit
             // });
 
             // Save token to local storage (Deprecated)
-            localStorage.setItem('token', this.token[0]);
+            localStorage.setItem(Shared.token, this.token[0]);
 
             // Check if registration was completed or not
             if (localStorage.getItem('registering') === 'true') {
@@ -163,7 +170,7 @@ export class Login2Component implements OnInit
                 console.log(data);
 
                 for (const item of data) {
-                    this.newUser = data.find((x: { username: any; }) => x.username === localStorage.getItem('username'));
+                    this.newUser = data.find((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
                 }
 
                 if (this.newUser === undefined) {
@@ -175,23 +182,23 @@ export class Login2Component implements OnInit
                 console.log('Logged-in: ' + this.newUser.loggedIn);
 
                 // Save this user 'id' to local storage!
-                localStorage.setItem('id', this.newUser.id);
+                localStorage.setItem(Shared.userId, this.newUser.id);
 
                 if (this.newUser.loggedIn) {
                     setTimeout(() => {
                         this.router.navigate(['/apps/dashboards/project']);
                     }, 500);
 
-                    if (localStorage.getItem('refreshCliked') === 'true') {
+                    if (localStorage.getItem(Shared.refreshCliked) === 'true') {
                         setTimeout(() => {
-                            this.snackBar.open('Welcome back ' + localStorage.getItem('username'), 'Dismiss', { duration: 3500 });
+                            this.snackBar.open('Welcome back ' + localStorage.getItem(Shared.username), 'Dismiss', { duration: 3500 });
                         }, 2000);
-                        localStorage.removeItem('refreshCliked');
+                        localStorage.removeItem(Shared.refreshCliked);
 
                         return;
                     }
                     setTimeout(() => {
-                        this.snackBar.open('Welcome ' + localStorage.getItem('username'), 'Dismiss', { duration: 3500 });
+                        this.snackBar.open('Welcome ' + localStorage.getItem(Shared.username), 'Dismiss', { duration: 3500 });
                     }, 2000);
                 }
             });
@@ -205,7 +212,7 @@ export class Login2Component implements OnInit
 
         const capitalizeUsername = name ? name.charAt(0).toUpperCase() + name.substr(1).toLowerCase() : '';
 
-        localStorage.setItem('username', capitalizeUsername);
+        localStorage.setItem(Shared.username, capitalizeUsername);
 
         if (localStorage.getItem('accountCreated') === 'true' && password !== localStorage.getItem('passwordCheck')) {
             this.snackBar.open('Wrong password!', 'Ok', { duration: 3000 });
@@ -238,7 +245,7 @@ export class Login2Component implements OnInit
             // });
 
             // Save token to local storage (Deprecated)
-            localStorage.setItem('token', this.token[0]);
+            localStorage.setItem(Shared.token, this.token[0]);
             
             // Get current user's data
             this._projectDashboardService.getTeamData().subscribe(userArray => {
@@ -249,7 +256,7 @@ export class Login2Component implements OnInit
                 console.log(this.user);
 
                 // Save current userId to local storage
-                localStorage.setItem('id', this.user.id);
+                localStorage.setItem(Shared.userId, this.user.id);
 
                 // Drop this user (with saved id)
                 this.loginService.removeUser().subscribe(() => {
@@ -270,14 +277,14 @@ export class Login2Component implements OnInit
                         console.log('Re-created!');
                         console.log(updated);
 
-                        localStorage.setItem('id', updated.id);
+                        localStorage.setItem(Shared.userId, updated.id);
                         localStorage.setItem('name', this.loginForm.value.username);
-                        localStorage.setItem('username', updated.username);
-                        localStorage.setItem('email', updated.email);
-                        localStorage.setItem('password', password);
-                        localStorage.setItem('phone', updated.phone);
-                        localStorage.setItem('roles', updated.roles);
-                        localStorage.setItem('permissions', updated.permissions);
+                        localStorage.setItem(Shared.username, updated.username);
+                        localStorage.setItem(Shared.email, updated.email);
+                        localStorage.setItem(Shared.password, password);
+                        localStorage.setItem(Shared.phone, updated.phone);
+                        localStorage.setItem(Shared.roles, updated.roles);
+                        localStorage.setItem(Shared.permissions, updated.permissions);
 
                         localStorage.removeItem('passwordCheck');
                         localStorage.removeItem('accountCreated');
@@ -293,7 +300,6 @@ export class Login2Component implements OnInit
                 if (error.status === 403) {
                     const snackBarRef = this.snackBar.open('Wrong credentials OR This account does not exist yet!', 'Register', { duration: 5000 });
                     snackBarRef.onAction().subscribe(() => {
-                        localStorage.removeItem('auto_token_expiration_timer');
                         this.router.navigate(['/pages/auth/register-2']);
                     });
                 }
@@ -303,7 +309,6 @@ export class Login2Component implements OnInit
     cancleEventCheck() {
         localStorage.removeItem('passwordCheck');
         localStorage.removeItem('accountCreated');
-        localStorage.removeItem('auto_token_expiration_timer');
     }
 
     toggle(event: boolean) {

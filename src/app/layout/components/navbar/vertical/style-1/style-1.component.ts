@@ -8,6 +8,7 @@ import { FuseNavigationService } from '@fuse/components/navigation/navigation.se
 import { FusePerfectScrollbarDirective } from '@fuse/directives/fuse-perfect-scrollbar/fuse-perfect-scrollbar.directive';
 import { FuseSidebarService } from '@fuse/components/sidebar/sidebar.service';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
+import { Shared } from 'app/shared-pref/shared';
 
 @Component({
     selector     : 'navbar-vertical-style-1',
@@ -127,8 +128,8 @@ export class NavbarVerticalStyle1Component implements OnInit, OnDestroy
             });
 
         // Get username & email from local storage
-        this.username = localStorage.getItem('username');
-        this.email = localStorage.getItem('email');
+        this.username = localStorage.getItem(Shared.username);
+        this.email = localStorage.getItem(Shared.email);
     }
 
     /**

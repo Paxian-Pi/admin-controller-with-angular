@@ -33,6 +33,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
 
     username: string;
     user: any;
+    invalidUser: any;
     _id: string;
 
     // Private
@@ -175,18 +176,14 @@ export class ToolbarComponent implements OnInit, OnDestroy
             return;
         }
 
-        // Drop this user
-        this.loginService.removeUser().subscribe(() => {
-            console.log('User deleted!');
-        }, error => {
-            if (error.status === 500) {
-                localStorage.setItem('server_error', 'true');
+        // Get invalid user!
+        this._projectDashboardService.getTeamData().subscribe(data => {
+            console.log(data);
+
+            for (const item of data) {
+                this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem('username'));
             }
         });
-
-        if (localStorage.getItem('server_error') === 'true') {
-            return;
-        }
 
         // Re-create the user with logged-in update
         this.loginService.reCreateTeam({
@@ -198,21 +195,49 @@ export class ToolbarComponent implements OnInit, OnDestroy
             roles: localStorage.getItem('roles'),
             permissions: localStorage.getItem('permissions')
         })
-            .subscribe((updated) => {
-                console.log('Re-created!');
-                console.log(updated);
-                console.log('User with Id "' + updated.id + '" has been logged out!');
+        .subscribe((updated) => {
+            console.log('Re-created!');
+            console.log(updated);
+            console.log('User with Id "' + updated.id + '" has been logged out!');
 
-                localStorage.setItem('id', updated.id);
-                localStorage.removeItem('server_error');
+            localStorage.setItem('id', updated.id);
+        }, error => {
+            if (error.status === 500) {
+                localStorage.setItem('server_error', 'true');
+            }
+        });
 
-                // Navigate to dashboard on successful login
-                this.router.navigate(['/pages/auth/login-2']);
-            }, error => {
-                if (error.status === 500) {
-                    this.logout();
-                }
-            });
+        if (localStorage.getItem('server_error') === 'true') {
+            return;
+        }
+
+        // Drop this user
+        this.loginService.removeUser().subscribe(() => {
+            localStorage.removeItem('server_error');
+            console.log('User deleted!');
+            console.log(this.invalidUser[0].loggedIn);
+
+            // Navigate to dashboard on successful login
+            this.router.navigate(['/pages/auth/login-2']);
+        }, error => {
+            if (error.status === 500) {
+                localStorage.setItem('invalid_user_not_deleted', 'true');
+            }
+        });
+
+        if (localStorage.getItem('invalid_user_not_deleted') === 'true') {
+            // Call the 'removeUser' function again!
+            if (this.invalidUser[0].loggedIn === true) {
+                localStorage.setItem('id', this.invalidUser[0].id);
+                
+                this.loginService.removeUser().subscribe(() => {
+                    localStorage.removeItem('invalid_user_not_deleted');
+
+                    // Navigate to dashboard on successful login
+                    this.router.navigate(['/pages/auth/login-2']);
+                });
+            }
+        }
     }
 
     /**

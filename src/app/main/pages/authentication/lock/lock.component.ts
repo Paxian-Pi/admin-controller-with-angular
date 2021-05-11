@@ -6,6 +6,7 @@ import { fuseAnimations } from '@fuse/animations';
 import { LoginService } from 'app/model/login/login.service';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
 
 @Component({
     selector     : 'lock',
@@ -23,6 +24,7 @@ export class LockComponent implements OnInit
     logoutDisabled: boolean;
     isShown = true;
     token: any;
+    invalidUser: any;
 
     /**
      * Constructor
@@ -35,7 +37,8 @@ export class LockComponent implements OnInit
         private _formBuilder: FormBuilder,
         private loginService: LoginService,
         private router: Router,
-        private snackBar: MatSnackBar
+        private snackBar: MatSnackBar,
+        private _projectDashboardService: ProjectDashboardService
     )
     {
         // Configure the layout
@@ -127,47 +130,68 @@ export class LockComponent implements OnInit
             // Save token to local storage
             localStorage.setItem('token', this.token[0]);
 
-            setTimeout(() => {
-                // Drop this user
-                this.loginService.removeUser().subscribe(() => {
-                    console.log('User deleted!');
-                }, 
-                error => {
-                    if (error.status === 403) {
-                        localStorage.setItem('delete_error', 'true');
+            // Get invalid user!
+            this._projectDashboardService.getTeamData().subscribe(data => {
+                console.log(data);
+
+                for (const item of data) {
+                    this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem('username'));
+                }
+            });
+
+            // Re-create the user with logged-in update
+            this.loginService.reCreateTeam({
+                username: localStorage.getItem('username'),
+                email: localStorage.getItem('email'),
+                password: localStorage.getItem('password'),
+                loggedIn: false,
+                phone: localStorage.getItem('phone'),
+                roles: localStorage.getItem('roles'),
+                permissions: localStorage.getItem('permissions')
+            })
+                .subscribe((updated) => {
+                    console.log('Re-created!');
+                    console.log(updated);
+                    console.log('User with Id "' + updated.id + '" has been logged out!');
+
+                    localStorage.setItem('id', updated.id);
+                }, error => {
+                    if (error.status === 403 || error.status === 500) {
+                        localStorage.setItem('server_error', 'true');
                     }
                 });
 
-                if (localStorage.getItem('delete_error') === 'true') {
-                    return;
+            if (localStorage.getItem('server_error') === 'true') {
+                return;
+            }
+
+            // Drop this user
+            this.loginService.removeUser().subscribe(() => {
+                localStorage.removeItem('server_error');
+                console.log('User deleted!');
+                console.log(this.invalidUser[0].loggedIn);
+
+                // Navigate to dashboard on successful login
+                this.router.navigate(['/pages/auth/login-2']);
+            }, error => {
+                if (error.status === 403 || error.status === 500) {
+                    localStorage.setItem('invalid_user_not_deleted', 'true');
                 }
-                
-                // Re-create the user with logged-in update
-                this.loginService.reCreateTeam({
-                    username: localStorage.getItem('username'),
-                    email: localStorage.getItem('email'),
-                    password: localStorage.getItem('password'),
-                    loggedIn: false,
-                    phone: localStorage.getItem('phone'),
-                    roles: localStorage.getItem('roles'),
-                    permissions: localStorage.getItem('permissions')
-                })
-                    .subscribe(updated => {
+            });
 
-                        console.log('Re-created!');
-                        console.log(updated);
-                        console.log('User with Id "' + updated.id + '" has been logged out!');
-
-                        localStorage.setItem('id', updated.id);
-                        localStorage.removeItem('delete_error');
+            if (localStorage.getItem('invalid_user_not_deleted') === 'true') {
+                // Call the 'removeUser' function again!
+                if (this.invalidUser[0].loggedIn === true) {
+                    localStorage.setItem('id', this.invalidUser[0].id);
+                    
+                    this.loginService.removeUser().subscribe(() => {
+                        localStorage.removeItem('invalid_user_not_deleted');
 
                         // Navigate to dashboard on successful login
                         this.router.navigate(['/pages/auth/login-2']);
-                    }, 
-                    error => {
-                        if (error) { this.logout(); }
                     });
-            }, 500);
+                }
+            }
         });
     }
 }

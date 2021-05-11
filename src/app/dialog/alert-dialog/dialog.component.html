@@ -3,6 +3,6 @@
     <h3>{{ message }}</h3>
 </mat-dialog-content>
 <mat-dialog-actions fxLayoutAlign='end'>
-    <button mat-button [mat-dialog-close]="true">Yes, Logout</button>
-    <button mat-button [mat-dialog-close]='false' cdkFocusInitial>Cancel</button>
+    <button mat-button [mat-dialog-close]="true">{{ negativeButton }}</button>
+    <button mat-button [mat-dialog-close]='false' cdkFocusInitial>{{ positiveButton }}</button>
 </mat-dialog-actions>

@@ -159,7 +159,12 @@ export class ToolbarComponent implements OnInit, OnDestroy
     logoutDialog() {
         const dialogRef = this.dialog.open(DialogComponent, {
             width: '400px',
-            data: { title: 'Confirmation!', message: 'You are about to log out?' }
+            data: { 
+                title: 'Confirmation!', 
+                message: 'You are about to log out?', 
+                negativeButton: 'YES, LOGOUT', 
+                positiveButton: 'CANCEL'
+            }
         });
 
         dialogRef.afterClosed().subscribe(result => {
@@ -202,7 +207,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
 
             localStorage.setItem('id', updated.id);
         }, error => {
-            if (error.status === 500) {
+            if (error.status === 403 || error.status === 500) {
                 localStorage.setItem('server_error', 'true');
             }
         });
@@ -220,7 +225,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
             // Navigate to dashboard on successful login
             this.router.navigate(['/pages/auth/login-2']);
         }, error => {
-            if (error.status === 500) {
+            if (error.status === 403 || error.status === 500) {
                 localStorage.setItem('invalid_user_not_deleted', 'true');
             }
         });
@@ -229,7 +234,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
             // Call the 'removeUser' function again!
             if (this.invalidUser[0].loggedIn === true) {
                 localStorage.setItem('id', this.invalidUser[0].id);
-                
+
                 this.loginService.removeUser().subscribe(() => {
                     localStorage.removeItem('invalid_user_not_deleted');
 

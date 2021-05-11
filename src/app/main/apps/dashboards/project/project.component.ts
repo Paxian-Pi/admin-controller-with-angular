@@ -286,17 +286,20 @@ export class ProjectDashboardComponent implements OnInit
     }
 
     openDialog() {
-        this.onChat = false;
-        this.onDialogOpen = true;
-        
-        const dialogRef = this.dialog.open(DialogComponent, { 
-            height: '300px',
+        const dialogRef = this.dialog.open(DialogComponent, {
             width: '400px',
-            data: { name: 'Pax' }
+            data: { 
+                title: 'Resolve Requests!', 
+                message: '...', 
+                negativeButton: 'CANCEL', 
+                positiveButton: 'PROCCESS'
+            }
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            console.log(`Dialog result: ${result}`);
+            if (result === true) { 
+
+            }
         });
     }
 

@@ -66,20 +66,7 @@ export class ProjectDashboardService implements Resolve<any>
     }
 
     // Get users from db
-    public getTeamData(): Observable<any> {
-
-        // Get new token
-        // this.getToken().subscribe(res => {
-        //     for (const item of res) {
-        //         this.tokenData = res.find((x: { id: any; }) => x.id === localStorage.getItem('token_id'));
-        //     }
-        //     if (this.tokenData === undefined) {
-        //         return;
-        //     }
-        //     localStorage.setItem('token_id', this.tokenData.id);
-        //     const token = this.tokenData.token;
-        // });
-         
+    public getTeamData(): Observable<any> {         
         const token = localStorage.getItem('token');
         const httpOptions = { headers: new HttpHeaders().set('Authorization', token) };
         return this.httpClient.get<any>(this.appUrl + 'team', httpOptions);

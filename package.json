@@ -4,8 +4,8 @@
   "license": "https://themeforest.net/licenses/terms/regular",
   "scripts": {
     "ng": "ng",
-    "heroku-postbuild": "ng build --prod && npm install -g http-server-spa",
-    "start": "http-server-spa dist/fuse index.html $PORT",
+    "heroku-postbuild": "ng build --prod",
+    "start": "node server.js",
     "start:mem": "node --max_old_space_size=6144 ./node_modules/@angular/cli/bin/ng serve --open",
     "build": "ng build",
     "build:prod": "ng build --prod",
@@ -15,6 +15,10 @@
     "e2e": "ng e2e",
     "bundle-report": "webpack-bundle-analyzer dist/stats.json"
   },
+  "engines": {
+    "node": "12.18.2",
+    "npm": "7.6.3"
+  },
   "private": true,
   "dependencies": {
     "@agm/core": "1.1.0",
@@ -22,6 +26,8 @@
     "@angular/cdk": "11.0.0",
     "@angular/common": "11.0.0",
     "@angular/compiler": "11.0.0",
+    "@angular/cli": "11.0.0",
+    "@angular/compiler-cli": "11.0.0",
     "@angular/core": "11.0.0",
     "@angular/flex-layout": "10.0.0-beta.32",
     "@angular/forms": "11.0.0",
@@ -65,6 +71,7 @@
     "rxjs": "6.6.3",
     "tslib": "2.0.3",
     "web-animations-js": "2.3.2",
+    "typescript": "4.0.5",
     "zone.js": "0.10.3"
   },
   "devDependencies": {

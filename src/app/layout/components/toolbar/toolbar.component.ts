@@ -158,7 +158,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
     logoutDialog() {
         const dialogRef = this.dialog.open(DialogComponent, {
             width: '400px',
-            data: { title: 'Confirmation!', message: 'Do you want to logged out?' }
+            data: { title: 'Confirmation!', message: 'You are about to log out?' }
         });
 
         dialogRef.afterClosed().subscribe(result => {

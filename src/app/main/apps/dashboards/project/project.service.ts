@@ -81,7 +81,6 @@ export class ProjectDashboardService implements Resolve<any>
         // });
          
         const token = localStorage.getItem('token');
-        console.log(token);
         const httpOptions = { headers: new HttpHeaders().set('Authorization', token) };
         return this.httpClient.get<any>(this.appUrl + 'team', httpOptions);
     }

@@ -51,7 +51,7 @@
             </form>
 
             <div class="message">
-                <a class="disabled-text" [routerLink]="'/pages/auth/login-2'" 
+                <a class="disabled-text" [routerLink]="'/pages/auth/login-2'" *ngIf="isShown"
                     (click)="logout()">
                         Not {{ name }}? Switch Account
                 </a>

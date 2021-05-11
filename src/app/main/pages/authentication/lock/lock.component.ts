@@ -21,6 +21,7 @@ export class LockComponent implements OnInit
     password: string;
     logoutBtn: string;
     logoutDisabled: boolean;
+    isShown = true;
     token: any;
 
     /**
@@ -79,8 +80,9 @@ export class LockComponent implements OnInit
         });
         
         if (localStorage.getItem('authTokenError') === 'true') {
+            this.isShown = false;
             this.logoutDisabled = true;
-            this.snackBar.open('Session expired! Refresh before login out...', 'Refresh', { duration: 5000 })
+            this.snackBar.open('Session expired! You need to refresh before logging out...', 'Refresh', { duration: 5000 })
                 .onAction().subscribe(() => {
                     this.refresh();
                 });
@@ -96,6 +98,7 @@ export class LockComponent implements OnInit
     
     logoutEvent(): void {
 
+        this.isShown = false;
         this.logoutDisabled = true;
 
         const snackBarRef = this.snackBar.open('Do you want to logout?', 'Yes, Logout', { duration: 5000 });
@@ -106,6 +109,7 @@ export class LockComponent implements OnInit
 
         snackBarRef.afterDismissed().subscribe(() => {
             this.logoutDisabled = false;
+            this.isShown = true;
         });
     }
 

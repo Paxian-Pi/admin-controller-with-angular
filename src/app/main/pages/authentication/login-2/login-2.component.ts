@@ -219,7 +219,7 @@ export class Login2Component implements OnInit
             return;
         }
 
-        const userID = localStorage.get(Shared.userId);
+        const userID = localStorage.getItem(Shared.userId);
 
         this.loginService.login({ username: capitalizeUsername, password: password }).subscribe(res => {
             console.log(JSON.stringify(res));

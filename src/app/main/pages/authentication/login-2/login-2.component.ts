@@ -257,7 +257,7 @@ export class Login2Component implements OnInit
                 console.log(this.user);
 
                 // Check current logged-in status
-                if (userID === this.user.id && this.user.loggedIn) {
+                if (this.user.loggedIn) {
                     this.snackBar.open('You are currently logged-in another device!', 'Ok');
                     return;
                 }

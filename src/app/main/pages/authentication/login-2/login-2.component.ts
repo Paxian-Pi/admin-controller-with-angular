@@ -219,6 +219,8 @@ export class Login2Component implements OnInit
             return;
         }
 
+        const userID = localStorage.get(Shared.userId);
+
         this.loginService.login({ username: capitalizeUsername, password: password }).subscribe(res => {
             console.log(JSON.stringify(res));
 
@@ -252,8 +254,13 @@ export class Login2Component implements OnInit
                 for (const item of userArray) {
                     this.user = userArray.find((x: { username: any; }) => x.username === capitalizeUsername);
                 }
-
                 console.log(this.user);
+
+                // Check current logged-in status
+                if (userID === this.user.id && this.user.loggedIn) {
+                    this.snackBar.open('You are currently logged-in another device!', 'Ok');
+                    return;
+                }
 
                 // Save current userId to local storage
                 localStorage.setItem(Shared.userId, this.user.id);
@@ -273,27 +280,27 @@ export class Login2Component implements OnInit
                     roles: this.user.roles,
                     permissions: this.user.permissions
                 })
-                    .subscribe((updated) => {
-                        console.log('Re-created!');
-                        console.log(updated);
+                .subscribe((updated) => {
+                    console.log('Re-created!');
+                    console.log(updated);
 
-                        localStorage.setItem(Shared.userId, updated.id);
-                        localStorage.setItem('name', this.loginForm.value.username);
-                        localStorage.setItem(Shared.username, updated.username);
-                        localStorage.setItem(Shared.email, updated.email);
-                        localStorage.setItem(Shared.password, password);
-                        localStorage.setItem(Shared.phone, updated.phone);
-                        localStorage.setItem(Shared.roles, updated.roles);
-                        localStorage.setItem(Shared.permissions, updated.permissions);
+                    localStorage.setItem(Shared.userId, updated.id);
+                    localStorage.setItem('name', this.loginForm.value.username);
+                    localStorage.setItem(Shared.username, updated.username);
+                    localStorage.setItem(Shared.email, updated.email);
+                    localStorage.setItem(Shared.password, password);
+                    localStorage.setItem(Shared.phone, updated.phone);
+                    localStorage.setItem(Shared.roles, updated.roles);
+                    localStorage.setItem(Shared.permissions, updated.permissions);
 
-                        localStorage.removeItem('passwordCheck');
-                        localStorage.removeItem('accountCreated');
+                    localStorage.removeItem('passwordCheck');
+                    localStorage.removeItem('accountCreated');
 
-                        console.log('User has been updated with Id "' + updated.id + '"');
+                    console.log('User has been updated with Id "' + updated.id + '"');
 
-                        // Navigate to dashboard on successful login
-                        this.router.navigate(['/apps/dashboards/project']);
-                    });
+                    // Navigate to dashboard on successful login
+                    this.router.navigate(['/apps/dashboards/project']);
+                });
             });
         }, error => {
                 console.log(error);

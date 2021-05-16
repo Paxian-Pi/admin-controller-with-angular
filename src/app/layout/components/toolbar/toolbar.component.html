@@ -46,9 +46,14 @@
                     <span>Inbox</span>
                 </button>
 
-                <button mat-menu-item class="" (click)="logoutDialog()">
+                <button mat-menu-item class="" (click)="logoutDialog()" *ngIf="isShown">
                     <mat-icon>exit_to_app</mat-icon>
                     <span>Logout</span>
+                </button>
+
+                <button mat-menu-item class="" (click)="refresh()" *ngIf="!isShown">
+                    <mat-icon>refresh</mat-icon>
+                    <span>Refresh Page</span>
                 </button>
 
             </mat-menu>

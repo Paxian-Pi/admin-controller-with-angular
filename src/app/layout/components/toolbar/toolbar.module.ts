@@ -30,7 +30,8 @@ import { ProjectDashboardService } from 'app/main/apps/dashboards/project/projec
         ToolbarComponent
     ],
     providers: [
-        ProjectDashboardService
+        ProjectDashboardService,
+        ToolbarComponent
     ]
 })
 export class ToolbarModule

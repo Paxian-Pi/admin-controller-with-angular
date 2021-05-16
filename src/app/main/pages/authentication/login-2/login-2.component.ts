@@ -16,6 +16,9 @@ import { environment } from 'environments/environment';
 import { Token } from 'app/model/token/token';
 import { Shared } from 'app/shared-pref/shared';
 import { controllers } from 'chart.js';
+import { DialogComponent } from 'app/dialog/alert-dialog/dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ToolbarComponent } from 'app/layout/components/toolbar/toolbar.component';
 
 @Component({
     selector     : 'login-2',
@@ -42,6 +45,8 @@ export class Login2Component implements OnInit
     auth: string;
 
     appUrl = environment.baseUrl + 'api/';
+    alternateUser: any;
+    invalidUser: any;
 
     /**
      * Constructor
@@ -59,6 +64,8 @@ export class Login2Component implements OnInit
         private tokenService: TokenService,
         private snackBar: MatSnackBar,
         private httpClient: HttpClient,
+        public dialog: MatDialog,
+        private toolbarComponent: ToolbarComponent
     )
     {
         // Configure the layout
@@ -95,7 +102,7 @@ export class Login2Component implements OnInit
         });
 
         const upperCase = `${localStorage.getItem(Shared.username)} ${localStorage.getItem(Shared.roles)}`;
-        if (upperCase === 'null null') {
+        if (upperCase === 'null null' || upperCase === `${localStorage.getItem(Shared.username)} null`) {
             this.nameUpperCase = 'ADMIN CONTROLLER';
         }
         else {
@@ -132,19 +139,6 @@ export class Login2Component implements OnInit
             }
             console.log('New auto-generated token:\n' + JSON.stringify(this.token[0]));
 
-            // // Delete expired token
-            // this._projectDashboardService.deleteToken().subscribe((_id) => {
-            //     console.log(`Old token with id "${_id.id}", deleted!`);
-            // });
-
-            // // Push token to db
-            // this.loginService.postToken({ token: this.token[0] }).subscribe(authToken => {
-            //     this.tokenId = authToken.id;
-
-            //     console.log('New token Id: ' + JSON.stringify(this.tokenId));
-            //     localStorage.setItem('token_id', this.tokenId);
-            // });
-
             // Save token to local storage (Deprecated)
             localStorage.setItem(Shared.token, this.token[0]);
 
@@ -170,6 +164,7 @@ export class Login2Component implements OnInit
                 console.log(data);
 
                 for (const item of data) {
+                    this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
                     this.newUser = data.find((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
                 }
 
@@ -178,31 +173,51 @@ export class Login2Component implements OnInit
                     return;
                 }
 
+                if (this.invalidUser.length > 1 && !this.newUser.loggedIn) {
+                    this.loginService.removeUser().subscribe((removedUser) => {
+                        this.router.navigate(['/']);
+                        console.log(removedUser);
+                    });
+                }
+
+                console.log(this.invalidUser.length);
+
                 console.log('User Id: ' + JSON.stringify(this.newUser.id));
                 console.log('Logged-in: ' + this.newUser.loggedIn);
 
                 // Save this user 'id' to local storage!
                 localStorage.setItem(Shared.userId, this.newUser.id);
 
-                if (this.newUser.loggedIn) {
-                    setTimeout(() => {
-                        this.router.navigate(['/apps/dashboards/project']);
-                    }, 500);
-
-                    if (localStorage.getItem(Shared.refreshCliked) === 'true') {
-                        setTimeout(() => {
-                            this.snackBar.open('Welcome back ' + localStorage.getItem(Shared.username), 'Dismiss', { duration: 3500 });
-                        }, 2000);
-                        localStorage.removeItem(Shared.refreshCliked);
-
-                        return;
-                    }
-                    setTimeout(() => {
-                        this.snackBar.open('Welcome ' + localStorage.getItem(Shared.username), 'Dismiss', { duration: 3500 });
-                    }, 2000);
+                if (!this.newUser.loggedIn && localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
+                    this.snackBar.open('You have been logged out from another device!', 'Ok', { duration: 5000 });
+                    localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
                 }
+
+                if (this.newUser.loggedIn) { this.loggedIn(); }
             });
         });
+    }
+
+    loggedIn() {
+        setTimeout(() => {
+            this.router.navigate(['/apps/dashboards/project']);
+        }, 500);
+
+        if (localStorage.getItem(Shared.nowLoggedOut) !== 'true') {
+            if (localStorage.getItem(Shared.refreshCliked) === 'true') {
+                setTimeout(() => {
+                    this.snackBar.open('Welcome back ' + localStorage.getItem(Shared.username), 'Dismiss', { duration: 3500 });
+                }, 2000);
+                localStorage.removeItem(Shared.refreshCliked);
+
+                return;
+            }
+            setTimeout(() => {
+                this.snackBar.open('Welcome ' + localStorage.getItem(Shared.username), 'Dismiss', { duration: 3500 });
+            }, 2000);
+        }
+
+        localStorage.removeItem(Shared.nowLoggedOut);
     }
 
     login() {
@@ -224,8 +239,6 @@ export class Login2Component implements OnInit
         this.loginService.login({ username: capitalizeUsername, password: password }).subscribe(res => {
             console.log(JSON.stringify(res));
 
-            this.auth = 'Login successfull!';
-
             this.token = [];
 
             // tslint:disable-next-line: forin
@@ -233,20 +246,7 @@ export class Login2Component implements OnInit
                 this.token.push(res[key]);
             }
 
-            // Delete expired token
-            // this._projectDashboardService.deleteToken().subscribe((_id) => {
-            //     console.log(`Old token with id "${_id.id}", deleted!`);
-            // });
-
-            // Push new token to db
-            // this.loginService.postToken({ token: this.token[0] }).subscribe(authToken => {
-            //     this.tokenId = authToken;
-
-            //     console.log('New token Id: ' + JSON.stringify(this.tokenId));
-            //     localStorage.setItem('token_id', this.tokenId);
-            // });
-
-            // Save token to local storage (Deprecated)
+            // Save token to local storage
             localStorage.setItem(Shared.token, this.token[0]);
             
             // Get current user's data
@@ -258,7 +258,32 @@ export class Login2Component implements OnInit
 
                 // Check current logged-in status
                 if (this.user.loggedIn) {
-                    this.snackBar.open('You are currently logged-in another device!', 'Ok');
+
+                    localStorage.setItem(Shared.currentlyLoggedIn, 'true');
+
+                    const dialogRef = this.dialog.open(DialogComponent, {
+                        width: '600px',
+                        data: {
+                            title: 'Logged-In Status!',
+                            message: 'You are currently logged in another device!\nDo you want to continue on this device (you will be logged out of the other device), OR remain logged-in on all devices?',
+                            negativeButton: 'LOGIN ANYWAY',
+                            positiveButton: 'CONTINUE ON THIS DEVICE ONLY'
+                        }
+                    });
+                    dialogRef.afterClosed().subscribe(result => {
+                        if (result === true) { this.loggedIn(); }
+                        else {
+                            this.snackBar.open('Click the login button...', 'Ok', { duration: 5000 });
+                            console.log(result);
+                            this.toolbarComponent.logout();
+                        }
+                    });
+
+                    // this.snackBar.open('You are currently logged-in another device!', 'Ok', { duration: 15000 })
+                    //     .onAction().subscribe(() => {
+                    //         this.loginForm.patchValue({ username: '', password: '' });
+                    //     });
+
                     return;
                 }
 
@@ -281,6 +306,8 @@ export class Login2Component implements OnInit
                     permissions: this.user.permissions
                 })
                 .subscribe((updated) => {
+                    this.auth = 'Login successfull!';
+
                     console.log('Re-created!');
                     console.log(updated);
 

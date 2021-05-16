@@ -223,11 +223,12 @@ export class Register2Component implements OnInit, OnDestroy
                     this.isDisabledSubmitButton = true;
 
                     this.snackBar.open('Account has been created successfully!', 'Continue').onAction().subscribe(() => {
-                        // Navigate to login
-                        this.router.navigate(['/pages/auth/login-2']);
                         localStorage.setItem('accountCreated', 'true');
                         localStorage.removeItem('registering');
                         localStorage.removeItem('createdIncomplete');
+
+                        // Navigate to login
+                        this.router.navigate(['/pages/auth/login-2']);
                     });
                 }, 
                 error => {

@@ -11,6 +11,7 @@ import { FuseSharedModule } from '@fuse/shared.module';
 import { Login2Component } from 'app/main/pages/authentication/login-2/login-2.component';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
 import { MaterialModule } from 'app/material/material.module';
+import { ToolbarComponent } from 'app/layout/components/toolbar/toolbar.component';
 
 const routes = [
     {
@@ -38,7 +39,8 @@ const routes = [
         FuseSharedModule
     ],
     providers: [
-        ProjectDashboardService
+        ProjectDashboardService,
+        ToolbarComponent
     ]
 })
 export class Login2Module

@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectDashboardService } from 'app/main/apps/dashboards/project/project.service';
 import { Shared } from 'app/shared-pref/shared';
+import { ToolbarComponent } from 'app/layout/components/toolbar/toolbar.component';
 
 @Component({
     selector     : 'lock',
@@ -39,7 +40,8 @@ export class LockComponent implements OnInit
         private loginService: LoginService,
         private router: Router,
         private snackBar: MatSnackBar,
-        private _projectDashboardService: ProjectDashboardService
+        private _projectDashboardService: ProjectDashboardService,
+        private toolbarComponent: ToolbarComponent
     )
     {
         // Configure the layout
@@ -107,6 +109,12 @@ export class LockComponent implements OnInit
         const snackBarRef = this.snackBar.open('Do you want to logout?', 'Yes, Logout', { duration: 5000 });
 
         snackBarRef.onAction().subscribe(() => {
+            if (localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
+                setTimeout(() => {
+                    this.router.navigate(['/']);
+                }, 500);
+                return;
+            }
             this.logout();
         });
 
@@ -135,9 +143,11 @@ export class LockComponent implements OnInit
                 console.log(data);
 
                 for (const item of data) {
-                    this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem('username'));
+                    this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
                 }
             });
+
+            localStorage.removeItem(Shared.serverError);
 
             // Re-create the user with logged-in update
             this.loginService.reCreateTeam({
@@ -149,49 +159,33 @@ export class LockComponent implements OnInit
                 roles: localStorage.getItem(Shared.roles),
                 permissions: localStorage.getItem(Shared.permissions)
             })
-                .subscribe((updated) => {
-                    console.log('Re-created!');
-                    console.log(updated);
-                    console.log('User with Id "' + updated.id + '" has been logged out!');
+            .subscribe((updated) => {
+                console.log('Re-created!');
+                console.log(updated);
+                console.log('User with Id "' + updated.id + '" has been logged out!');
 
-                    localStorage.setItem(Shared.userId, updated.id);
-                }, error => {
-                    if (error.status === 403 || error.status === 500) {
-                        localStorage.setItem('server_error', 'true');
-                    }
-                });
+                localStorage.setItem(Shared.userId, updated.id);
+            }, 
+            error => {
+                if (error.status === 403 || error.status === 500) {
+                    localStorage.setItem(Shared.serverError, 'true');
+                }
+            });
 
-            if (localStorage.getItem('server_error') === 'true') {
+            if (localStorage.getItem(Shared.serverError) === 'true') {
                 return;
             }
 
             // Drop this user
             this.loginService.removeUser().subscribe(() => {
-                localStorage.removeItem('server_error');
+                localStorage.removeItem(Shared.serverError);
                 console.log('User deleted!');
                 console.log(this.invalidUser[0].loggedIn);
 
                 // Navigate to dashboard on successful login
                 this.router.navigate(['/pages/auth/login-2']);
-            }, error => {
-                if (error.status === 403 || error.status === 500) {
-                    localStorage.setItem('invalid_user_not_deleted', 'true');
-                }
+
             });
-
-            if (localStorage.getItem('invalid_user_not_deleted') === 'true') {
-                // Call the 'removeUser' function again!
-                if (this.invalidUser[0].loggedIn === true) {
-                    localStorage.setItem('id', this.invalidUser[0].id);
-
-                    this.loginService.removeUser().subscribe(() => {
-                        localStorage.removeItem('invalid_user_not_deleted');
-
-                        // Navigate to dashboard on successful login
-                        this.router.navigate(['/pages/auth/login-2']);
-                    });
-                }
-            }
         });
     }
 }

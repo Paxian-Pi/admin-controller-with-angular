@@ -14,6 +14,7 @@ import { ProjectDashboardService } from 'app/main/apps/dashboards/project/projec
 import { MatDialog } from '@angular/material/dialog';
 import { DialogComponent } from 'app/dialog/alert-dialog/dialog.component';
 import { Shared } from 'app/shared-pref/shared';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector     : 'toolbar',
@@ -36,6 +37,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
     user: any;
     invalidUser: any;
     _id: string;
+    isShown = true;
 
     // Private
     private _unsubscribeAll: Subject<any>;
@@ -54,6 +56,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
         private _translateService: TranslateService,
         private router: Router,
         private loginService: LoginService,
+        private snackBar: MatSnackBar,
         private _projectDashboardService: ProjectDashboardService
     )
     {
@@ -160,7 +163,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
     logoutDialog() {
         const dialogRef = this.dialog.open(DialogComponent, {
             width: '400px',
-            data: { 
+            data: {
                 title: 'Confirmation!', 
                 message: 'You are about to log out?', 
                 negativeButton: 'YES, LOGOUT', 
@@ -169,11 +172,22 @@ export class ToolbarComponent implements OnInit, OnDestroy
         });
 
         dialogRef.afterClosed().subscribe(result => {
-            if (result === true) { this.logout(); }
+            if (result === true) {
+                this.logout();
+                this.isShown = false;
+                localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
+            }
         });
     }
 
+    refresh() {
+        setTimeout(() => {
+            this.router.navigate(['/']);
+        }, 500);
+    }
+
     logout(): void {
+        localStorage.removeItem(Shared.serverError);
 
         if (localStorage.getItem(Shared.authStatus) === 'tokenError') {
             localStorage.setItem(Shared.authTokenError, 'true');
@@ -187,7 +201,7 @@ export class ToolbarComponent implements OnInit, OnDestroy
             console.log(data);
 
             for (const item of data) {
-                this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem('username'));
+                this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
             }
         });
 
@@ -207,43 +221,27 @@ export class ToolbarComponent implements OnInit, OnDestroy
             console.log('User with Id "' + updated.id + '" has been logged out!');
 
             localStorage.setItem(Shared.userId, updated.id);
-        }, error => {
+        }, 
+        error => {
             if (error.status === 403 || error.status === 500) {
-                localStorage.setItem('server_error', 'true');
+                localStorage.setItem(Shared.serverError, 'true');
             }
         });
 
-        if (localStorage.getItem('server_error') === 'true') {
+        if (localStorage.getItem(Shared.serverError) === 'true') {
             return;
         }
 
         // Drop this user
         this.loginService.removeUser().subscribe(() => {
-            localStorage.removeItem('server_error');
+            localStorage.removeItem(Shared.serverError);
             console.log('User deleted!');
             console.log(this.invalidUser[0].loggedIn);
 
             // Navigate to dashboard on successful login
             this.router.navigate(['/pages/auth/login-2']);
-        }, error => {
-            if (error.status === 403 || error.status === 500) {
-                localStorage.setItem('invalid_user_not_deleted', 'true');
-            }
+
         });
-
-        if (localStorage.getItem('invalid_user_not_deleted') === 'true') {
-            // Call the 'removeUser' function again!
-            if (this.invalidUser[0].loggedIn === true) {
-                localStorage.setItem(Shared.userId, this.invalidUser[0].id);
-
-                this.loginService.removeUser().subscribe(() => {
-                    localStorage.removeItem('invalid_user_not_deleted');
-
-                    // Navigate to dashboard on successful login
-                    this.router.navigate(['/pages/auth/login-2']);
-                });
-            }
-        }
     }
 
     /**

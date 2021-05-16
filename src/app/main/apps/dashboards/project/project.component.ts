@@ -17,6 +17,7 @@ import { LoginService } from 'app/model/login/login.service';
 import { Router } from '@angular/router';
 import { DialogComponent } from 'app/dialog/alert-dialog/dialog.component';
 import { Shared } from 'app/shared-pref/shared';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
     selector     : 'project-dashboard',
@@ -44,7 +45,7 @@ export class ProjectDashboardComponent implements OnInit
     roles: string;
     permissions: string;
 
-    user: string;
+    server: string;
     
     pendingAuthCount: any;
     remainingCount: any;
@@ -69,6 +70,9 @@ export class ProjectDashboardComponent implements OnInit
     widget11: any = {};
 
     dateNow = new Date();
+    currentUser: any;
+    invalidUser: any;
+    monitorId: NodeJS.Timeout;
 
     /**
      * Constructor
@@ -81,6 +85,7 @@ export class ProjectDashboardComponent implements OnInit
         private _projectDashboardService: ProjectDashboardService,
         public dialog: MatDialog,
         private router: Router,
+        private snackBar: MatSnackBar,
         public loginService: LoginService) 
         
         {
@@ -242,12 +247,32 @@ export class ProjectDashboardComponent implements OnInit
         this._projectDashboardService.getTeamData().subscribe(data => {
 
                 for (const item of data) {
-                    this.user = data.find((x: { username: any; }) => x.username === 'Server');
+                    this.invalidUser = data.filter((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
+                    this.currentUser = data.find((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
+                    this.server = data.find((x: { username: any; }) => x.username === 'Server');
                 }
 
-                if (this.user !== undefined) {
+                if (this.server !== undefined) {
                     console.log(data.shift());
                 }
+
+                console.log(this.invalidUser.length);
+
+                if (this.invalidUser.length > 1 && this.currentUser.loggedIn) {
+                    this.loginService.removeUser().subscribe((removedUser) => {
+                        localStorage.setItem(Shared.nowLoggedOut, 'true');
+                        this.router.navigate(['/']);
+                        this.snackBar.open('You are now logged out!', 'Ok', { duration: 5000 });
+                        console.log(removedUser);
+                    });
+                }
+
+                if (!this.currentUser.loggedIn) {
+                    this.router.navigate(['/pages/auth/login-2']);
+                    return;
+                }
+                
+                localStorage.setItem(Shared.monitorId, this.currentUser.id);
                 
                 this.teams = data;
                 this.numberOfStaff = data.length;
@@ -261,7 +286,15 @@ export class ProjectDashboardComponent implements OnInit
                 }
             });
 
+        localStorage.setItem(Shared.alreadyLoggedOutfromOtherDevice, 'true');
         localStorage.removeItem(Shared.authTokenError);
+
+        this.monitorId = setInterval(() => {
+            console.log(localStorage.getItem(Shared.monitorId) === undefined);
+            if (localStorage.getItem(Shared.monitorId) === undefined) {
+                this.router.navigate(['/']);
+            }
+        }, 10000);
     }
 
     onInputChange(event: any) {

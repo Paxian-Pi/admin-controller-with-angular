@@ -250,26 +250,26 @@ export const navigation: FuseNavigation[] = [
     //             icon : 'alarm',
     //             url  : '/pages/coming-soon'
     //         },
-    //         {
-    //             id      : 'errors',
-    //             title   : 'Errors',
-    //             type    : 'collapsable',
-    //             icon    : 'error',
-    //             children: [
-    //                 {
-    //                     id   : '404',
-    //                     title: '404',
-    //                     type : 'item',
-    //                     url  : '/pages/errors/error-404'
-    //                 },
-    //                 {
-    //                     id   : '500',
-    //                     title: '500',
-    //                     type : 'item',
-    //                     url  : '/pages/errors/error-500'
-    //                 }
-    //             ]
-    //         },
+            {
+                id      : 'errors',
+                title   : 'Errors',
+                type    : 'collapsable',
+                icon    : 'error',
+                children: [
+                    {
+                        id   : '404',
+                        title: '404',
+                        type : 'item',
+                        url  : '/pages/errors/error-404'
+                    },
+                    {
+                        id   : '500',
+                        title: '500',
+                        type : 'item',
+                        url  : '/pages/errors/error-500'
+                    }
+                ]
+            },
     //         {
     //             id      : 'invoice',
     //             title   : 'Invoice',
@@ -719,12 +719,12 @@ export const navigation: FuseNavigation[] = [
     //                     type : 'item',
     //                     url  : '/documentation/components/navigation'
     //                 },
-    //                 {
-    //                     id   : 'progress-bar',
-    //                     title: 'Progress Bar',
-    //                     type : 'item',
-    //                     url  : '/documentation/components/progress-bar'
-    //                 },
+                    {
+                        id   : 'progress-bar',
+                        title: 'Progress Bar',
+                        type : 'item',
+                        url  : '/documentation/components/progress-bar'
+                    },
     //                 {
     //                     id   : 'search-bar',
     //                     title: 'Search Bar',

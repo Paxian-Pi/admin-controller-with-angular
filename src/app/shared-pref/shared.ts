@@ -8,6 +8,8 @@ export class Shared {
 
     public static userId = 'id';
     public static monitorId = 'monitorId';
+    public static passwordCheck = 'passwordCheck';
+    public static accountCreated = 'accountCreated';
 
     public static token = 'token';
     public static authTokenError = 'authTokenError';

@@ -111,6 +111,7 @@ export class Register2Component implements OnInit, OnDestroy
                 localStorage.setItem('accountCreated', 'true');
                 localStorage.removeItem('registering');
                 localStorage.removeItem('createdIncomplete');
+                localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
             });
         }
     }

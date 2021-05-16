@@ -73,6 +73,7 @@ export class ProjectDashboardComponent implements OnInit
     currentUser: any;
     invalidUser: any;
     monitorId: NodeJS.Timeout;
+    monitor: any;
 
     /**
      * Constructor
@@ -272,8 +273,6 @@ export class ProjectDashboardComponent implements OnInit
                     return;
                 }
                 
-                localStorage.setItem(Shared.monitorId, this.currentUser.id);
-                
                 this.teams = data;
                 this.numberOfStaff = data.length;
                 console.log(this.teams);
@@ -286,15 +285,23 @@ export class ProjectDashboardComponent implements OnInit
                 }
             });
 
-        localStorage.setItem(Shared.alreadyLoggedOutfromOtherDevice, 'true');
         localStorage.removeItem(Shared.authTokenError);
 
         this.monitorId = setInterval(() => {
-            console.log(localStorage.getItem(Shared.monitorId) === undefined);
+            this.monitorLoginStatus();
             if (localStorage.getItem(Shared.monitorId) === undefined) {
+                localStorage.setItem(Shared.alreadyLoggedOutfromOtherDevice, 'true');
+                clearInterval(this.monitorId);
                 this.router.navigate(['/']);
             }
-        }, 10000);
+        }, 5000);
+    }
+
+    monitorLoginStatus(): void {
+        this._projectDashboardService.getTeamData().subscribe(loginCheck => {
+            this.monitor = loginCheck.find((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
+            localStorage.setItem(Shared.monitorId, this.monitor.id);
+        });
     }
 
     onInputChange(event: any) {

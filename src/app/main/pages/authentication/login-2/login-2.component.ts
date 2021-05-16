@@ -188,9 +188,12 @@ export class Login2Component implements OnInit
                 // Save this user 'id' to local storage!
                 localStorage.setItem(Shared.userId, this.newUser.id);
 
-                if (!this.newUser.loggedIn && localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
-                    this.snackBar.open('You have been logged out from another device!', 'Ok', { duration: 5000 });
-                    localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
+                if (localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
+                    this.snackBar.open('You have been logged out from another device!', 'Ok');
+                    localStorage.removeItem(Shared.passwordCheck);
+                    localStorage.removeItem(Shared.accountCreated);
+
+                    return;
                 }
 
                 if (this.newUser.loggedIn) { this.loggedIn(); }
@@ -229,7 +232,7 @@ export class Login2Component implements OnInit
 
         localStorage.setItem(Shared.username, capitalizeUsername);
 
-        if (localStorage.getItem('accountCreated') === 'true' && password !== localStorage.getItem('passwordCheck')) {
+        if (localStorage.getItem(Shared.accountCreated) === 'true' && password !== localStorage.getItem(Shared.passwordCheck)) {
             this.snackBar.open('Wrong password!', 'Ok', { duration: 3000 });
             return;
         }
@@ -261,6 +264,15 @@ export class Login2Component implements OnInit
 
                     localStorage.setItem(Shared.currentlyLoggedIn, 'true');
 
+                    // Get duplicate logged-in user details
+                    localStorage.setItem(Shared.userId, this.user.id);
+                    localStorage.setItem(Shared.username, this.user.username);
+                    localStorage.setItem(Shared.email, this.user.email);
+                    localStorage.setItem(Shared.password, password);
+                    localStorage.setItem(Shared.phone, this.user.phone);
+                    localStorage.setItem(Shared.roles, this.user.roles);
+                    localStorage.setItem(Shared.permissions, this.user.permissions);
+
                     const dialogRef = this.dialog.open(DialogComponent, {
                         width: '600px',
                         data: {
@@ -273,9 +285,10 @@ export class Login2Component implements OnInit
                     dialogRef.afterClosed().subscribe(result => {
                         if (result === true) { this.loggedIn(); }
                         else {
-                            this.snackBar.open('Click the login button...', 'Ok', { duration: 5000 });
+                            // this.snackBar.open('Click the login button...', 'Ok', { duration: 5000 });
                             console.log(result);
-                            this.toolbarComponent.logout();
+                            localStorage.removeItem(Shared.serverError);
+                            this.logout();
                         }
                     });
 
@@ -320,8 +333,9 @@ export class Login2Component implements OnInit
                     localStorage.setItem(Shared.roles, updated.roles);
                     localStorage.setItem(Shared.permissions, updated.permissions);
 
-                    localStorage.removeItem('passwordCheck');
-                    localStorage.removeItem('accountCreated');
+                    localStorage.removeItem(Shared.passwordCheck);
+                    localStorage.removeItem(Shared.accountCreated);
+                    localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
 
                     console.log('User has been updated with Id "' + updated.id + '"');
 
@@ -341,8 +355,8 @@ export class Login2Component implements OnInit
     }
 
     cancleEventCheck() {
-        localStorage.removeItem('passwordCheck');
-        localStorage.removeItem('accountCreated');
+        localStorage.removeItem(Shared.passwordCheck);
+        localStorage.removeItem(Shared.accountCreated);
     }
 
     toggle(event: boolean) {
@@ -356,5 +370,41 @@ export class Login2Component implements OnInit
         }
 
         console.log(event);
+    }
+
+    logout() {
+        // Drop this user
+        this.loginService.removeUser().subscribe(() => {
+            console.log('User deleted!');
+
+        }, error => {
+            if (error.status === 403 || error.status === 500) {
+                localStorage.setItem(Shared.serverError, 'true');
+            }
+        });
+
+        if (localStorage.getItem(Shared.serverError) === 'true') {
+            return;
+        }
+
+        // Re-create the user with logged-in update
+        this.loginService.reCreateTeam({
+            username: localStorage.getItem(Shared.username),
+            email: localStorage.getItem(Shared.email),
+            password: localStorage.getItem(Shared.password),
+            loggedIn: false,
+            phone: localStorage.getItem(Shared.phone),
+            roles: localStorage.getItem(Shared.roles),
+            permissions: localStorage.getItem(Shared.permissions)
+        })
+        .subscribe((updated) => {
+            console.log('Re-created!');
+            console.log(updated);
+            console.log('User with Id "' + updated.id + '" has been logged out!');
+            this.login();
+            localStorage.removeItem(Shared.serverError);
+
+            localStorage.setItem(Shared.userId, updated.id);
+        });
     }
 }

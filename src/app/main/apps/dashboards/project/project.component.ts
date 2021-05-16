@@ -290,6 +290,7 @@ export class ProjectDashboardComponent implements OnInit
         this.monitorId = setInterval(() => {
             this.monitorLoginStatus();
             if (localStorage.getItem(Shared.monitorId) === undefined) {
+                console.log('Logged out!');
                 localStorage.setItem(Shared.alreadyLoggedOutfromOtherDevice, 'true');
                 clearInterval(this.monitorId);
                 this.router.navigate(['/']);

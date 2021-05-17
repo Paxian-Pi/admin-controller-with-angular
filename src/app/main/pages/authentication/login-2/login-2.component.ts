@@ -172,6 +172,7 @@ export class Login2Component implements OnInit
                 }
 
                 if (this.newUser === undefined) {
+                    this.nameUpperCase = 'ADMIN CONTROLLER';
                     console.log('No user is currently signed-in');
                     return;
                 }

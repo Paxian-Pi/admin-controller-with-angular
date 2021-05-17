@@ -142,6 +142,9 @@ export class Login2Component implements OnInit
             // Save token to local storage (Deprecated)
             localStorage.setItem(Shared.token, this.token[0]);
 
+            // Reset 'onDeviceLogIn'
+            // localStorage.removeItem(Shared.oneDeviceLogIn);
+
             // Check if registration was completed or not
             if (localStorage.getItem('registering') === 'true') {
                 setTimeout(() => {
@@ -188,11 +191,14 @@ export class Login2Component implements OnInit
                 // Save this user 'id' to local storage!
                 localStorage.setItem(Shared.userId, this.newUser.id);
 
-                if (localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
+                if (!this.newUser.loggedIn && localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
                     this.snackBar.open('You have been logged out from another device!', 'Ok');
                     localStorage.removeItem(Shared.passwordCheck);
                     localStorage.removeItem(Shared.accountCreated);
+                }
 
+                if (localStorage.getItem(Shared.oneDeviceLogIn) !== 'true') {
+                    console.log('You are currently logged-in one device!');
                     return;
                 }
 
@@ -262,7 +268,6 @@ export class Login2Component implements OnInit
                 // Check current logged-in status
                 if (this.user.loggedIn) {
 
-                    localStorage.setItem(Shared.currentlyLoggedIn, 'true');
 
                     // Get duplicate logged-in user details
                     localStorage.setItem(Shared.userId, this.user.id);
@@ -282,13 +287,15 @@ export class Login2Component implements OnInit
                             positiveButton: 'CONTINUE ON THIS DEVICE ONLY'
                         }
                     });
+
                     dialogRef.afterClosed().subscribe(result => {
-                        if (result === true) { this.loggedIn(); }
+                        if (result === true) {
+                            this.loggedIn();
+                            localStorage.removeItem(Shared.oneDeviceLogIn);
+                        }
                         else {
-                            // this.snackBar.open('Click the login button...', 'Ok', { duration: 5000 });
-                            console.log(result);
-                            localStorage.removeItem(Shared.serverError);
-                            this.logout();
+                            this.snackBar.open('You must logout of the other device first!', 'Ok');
+                            localStorage.setItem(Shared.oneDeviceLogIn, 'true');
                         }
                     });
 
@@ -401,7 +408,6 @@ export class Login2Component implements OnInit
             console.log('Re-created!');
             console.log(updated);
             console.log('User with Id "' + updated.id + '" has been logged out!');
-            this.login();
             localStorage.removeItem(Shared.serverError);
 
             localStorage.setItem(Shared.userId, updated.id);

@@ -16,7 +16,7 @@ export class Shared {
     public static authStatus = 'authStatus';
 
     public static refreshCliked = 'refreshCliked';
-    public static currentlyLoggedIn = 'currentlyLoggedIn';
+    public static oneDeviceLogIn = 'currentlyLoggedIn';
     public static alreadyLoggedOutfromOtherDevice = 'alreadyLoggedOut';
     public static nowLoggedOut = 'nowLoggedOut';
     public static oneDeviceLoginOption = 'oneDeviceLogin';

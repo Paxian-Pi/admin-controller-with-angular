@@ -97,6 +97,7 @@ export class LockComponent implements OnInit
     refresh() {
         localStorage.setItem(Shared.refreshCliked, 'true');
         setTimeout(() => {
+            localStorage.removeItem(Shared.oneDeviceLogIn);
             this.router.navigate(['/pages/auth/login-2']);
         }, 500);
     }

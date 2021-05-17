@@ -200,7 +200,7 @@ export class Login2Component implements OnInit
                     localStorage.removeItem(Shared.accountCreated);
                 }
 
-                if (localStorage.getItem(Shared.oneDeviceLogIn) !== 'true') {
+                if (localStorage.getItem(Shared.oneDeviceLogIn) === 'true') {
                     console.log('You are currently logged-in one device!');
                     return;
                 }
@@ -213,6 +213,7 @@ export class Login2Component implements OnInit
     loggedIn() {
         setTimeout(() => {
             this.router.navigate(['/apps/dashboards/project']);
+            localStorage.setItem(Shared.oneDeviceLogIn, 'true');
         }, 500);
 
         if (localStorage.getItem(Shared.nowLoggedOut) !== 'true') {
@@ -350,7 +351,6 @@ export class Login2Component implements OnInit
                     localStorage.removeItem(Shared.passwordCheck);
                     localStorage.removeItem(Shared.accountCreated);
                     localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
-                    localStorage.setItem(Shared.oneDeviceLogIn, 'true');
 
                     console.log('User has been updated with Id "' + updated.id + '"');
 

@@ -102,7 +102,9 @@ export class Login2Component implements OnInit
         });
 
         const upperCase = `${localStorage.getItem(Shared.username)} ${localStorage.getItem(Shared.roles)}`;
-        if (upperCase === 'null null' || upperCase === `${localStorage.getItem(Shared.username)} null`) {
+        if (upperCase === 'null null' || 
+                upperCase === `${localStorage.getItem(Shared.username)} null` || 
+                upperCase === `null ${localStorage.getItem(Shared.roles)}`) {
             this.nameUpperCase = 'ADMIN CONTROLLER';
         }
         else {
@@ -172,7 +174,6 @@ export class Login2Component implements OnInit
                 }
 
                 if (this.newUser === undefined) {
-                    this.nameUpperCase = 'ADMIN CONTROLLER';
                     console.log('No user is currently signed-in');
                     return;
                 }

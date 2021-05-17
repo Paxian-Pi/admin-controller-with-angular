@@ -236,6 +236,8 @@ export class ToolbarComponent implements OnInit, OnDestroy
         this.loginService.removeUser().subscribe(() => {
             localStorage.removeItem(Shared.serverError);
             localStorage.removeItem(Shared.oneDeviceLogIn);
+            localStorage.removeItem(Shared.username);
+            localStorage.removeItem(Shared.userId);
             console.log('User deleted!');
             console.log(this.invalidUser[0].loggedIn);
 

@@ -111,6 +111,8 @@ export class LockComponent implements OnInit
         snackBarRef.onAction().subscribe(() => {
             if (localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
                 setTimeout(() => {
+                    localStorage.removeItem(Shared.username);
+                    localStorage.removeItem(Shared.userId);
                     this.router.navigate(['/']);
                 }, 500);
                 return;

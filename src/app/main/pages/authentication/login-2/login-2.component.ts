@@ -200,7 +200,7 @@ export class Login2Component implements OnInit
                     localStorage.removeItem(Shared.accountCreated);
                 }
 
-                if (localStorage.getItem(Shared.oneDeviceLogIn) !== 'true') {
+                if (localStorage.getItem(Shared.authTokenError) !== 'true' && localStorage.getItem(Shared.oneDeviceLogIn) !== 'true') {
                     console.log('You are currently logged-in one device!');
                     return;
                 }

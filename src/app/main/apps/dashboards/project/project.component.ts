@@ -292,6 +292,8 @@ export class ProjectDashboardComponent implements OnInit
             if (localStorage.getItem(Shared.monitorId) === undefined) {
                 console.log('Logged out!');
                 localStorage.setItem(Shared.alreadyLoggedOutfromOtherDevice, 'true');
+                localStorage.removeItem(Shared.username);
+                localStorage.removeItem(Shared.userId);
                 clearInterval(this.monitorId);
                 this.router.navigate(['/']);
             }

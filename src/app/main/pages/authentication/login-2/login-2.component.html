@@ -63,7 +63,7 @@
                 </div>
 
                 <button mat-raised-button color="accent" class="submit-button" aria-label="LOGIN"
-                        [disabled]="loginForm.invalid"
+                        [disabled]="loginForm.invalid || isDisabledLoginButton"
                         (click)='login()'>
                     LOGIN
                 </button>

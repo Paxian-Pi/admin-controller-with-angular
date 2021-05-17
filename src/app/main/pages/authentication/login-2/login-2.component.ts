@@ -47,6 +47,7 @@ export class Login2Component implements OnInit
     appUrl = environment.baseUrl + 'api/';
     alternateUser: any;
     invalidUser: any;
+    isDisabledLoginButton: boolean;
 
     /**
      * Constructor
@@ -296,7 +297,11 @@ export class Login2Component implements OnInit
                             localStorage.removeItem(Shared.oneDeviceLogIn);
                         }
                         else {
-                            this.snackBar.open('You must logout of the other device first!', 'Ok');
+                            this.isDisabledLoginButton = true;
+                            this.snackBar.open('You must logout of the other device first!', 'Ok')
+                                .onAction().subscribe(() => {
+                                    this.isDisabledLoginButton = false;
+                                });
                             localStorage.setItem(Shared.oneDeviceLogIn, 'true');
                         }
                     });

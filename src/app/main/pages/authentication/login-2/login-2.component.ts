@@ -198,6 +198,8 @@ export class Login2Component implements OnInit
                     this.snackBar.open('You have been logged out from another device!', 'Ok');
                     localStorage.removeItem(Shared.passwordCheck);
                     localStorage.removeItem(Shared.accountCreated);
+                    localStorage.removeItem(Shared.username);
+                    localStorage.removeItem(Shared.userId);
                 }
 
                 if (localStorage.getItem(Shared.oneDeviceLogIn) === 'true') {
@@ -348,6 +350,7 @@ export class Login2Component implements OnInit
                     localStorage.setItem(Shared.roles, updated.roles);
                     localStorage.setItem(Shared.permissions, updated.permissions);
 
+                    localStorage.setItem(Shared.oneDeviceLogIn, 'true');
                     localStorage.removeItem(Shared.passwordCheck);
                     localStorage.removeItem(Shared.accountCreated);
                     localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);

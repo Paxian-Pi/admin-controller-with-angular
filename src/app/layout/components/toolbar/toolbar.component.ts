@@ -182,6 +182,8 @@ export class ToolbarComponent implements OnInit, OnDestroy
 
     refresh() {
         setTimeout(() => {
+            localStorage.removeItem(Shared.username);
+            localStorage.removeItem(Shared.userId);
             this.router.navigate(['/']);
         }, 500);
     }

@@ -175,15 +175,12 @@ export class ToolbarComponent implements OnInit, OnDestroy
             if (result === true) {
                 this.logout();
                 this.isShown = false;
-                localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
             }
         });
     }
 
     refresh() {
         setTimeout(() => {
-            localStorage.removeItem(Shared.username);
-            localStorage.removeItem(Shared.userId);
             this.router.navigate(['/']);
         }, 500);
     }
@@ -236,8 +233,8 @@ export class ToolbarComponent implements OnInit, OnDestroy
 
         // Drop this user
         this.loginService.removeUser().subscribe(() => {
+            localStorage.setItem(Shared.oneDeviceLogIn, 'true');
             localStorage.removeItem(Shared.serverError);
-            localStorage.removeItem(Shared.oneDeviceLogIn);
             localStorage.removeItem(Shared.username);
             localStorage.removeItem(Shared.userId);
             console.log('User deleted!');

@@ -174,13 +174,11 @@ export class Login2Component implements OnInit
                     this.newUser = data.find((x: { username: any; }) => x.username === localStorage.getItem(Shared.username));
                 }
 
-                if (this.newUser === undefined) {
-                    console.log('No user is currently signed-in');
-                    return;
-                }
-
                 if (this.invalidUser.length > 1 && !this.newUser.loggedIn) {
                     this.loginService.removeUser().subscribe((removedUser) => {
+                        localStorage.removeItem(Shared.username);
+                        localStorage.removeItem(Shared.userId);
+
                         this.router.navigate(['/']);
                         console.log(removedUser);
                     });
@@ -191,16 +189,13 @@ export class Login2Component implements OnInit
                 console.log('User Id: ' + JSON.stringify(this.newUser.id));
                 console.log('Logged-in: ' + this.newUser.loggedIn);
 
+                if (this.newUser === undefined) {
+                    console.log('No user is currently signed-in');
+                    return;
+                }
+
                 // Save this user 'id' to local storage!
                 localStorage.setItem(Shared.userId, this.newUser.id);
-
-                if (!this.newUser.loggedIn && localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
-                    this.snackBar.open('You have been logged out from another device!', 'Ok');
-                    localStorage.removeItem(Shared.passwordCheck);
-                    localStorage.removeItem(Shared.accountCreated);
-                    localStorage.removeItem(Shared.username);
-                    localStorage.removeItem(Shared.userId);
-                }
 
                 if (localStorage.getItem(Shared.oneDeviceLogIn) === 'true') {
                     console.log('You are currently logged-in one device!');
@@ -288,7 +283,7 @@ export class Login2Component implements OnInit
                         width: '600px',
                         data: {
                             title: 'Logged-In Status!',
-                            message: 'You are currently logged in another device!\nDo you want to continue on this device (you will be logged out of the other device), OR remain logged-in on all devices?',
+                            message: 'You are currently logged in another device!\nDo you want to continue on this device (you would have to log out of the other device), OR remain logged-in on all devices?',
                             negativeButton: 'LOGIN ANYWAY',
                             positiveButton: 'CONTINUE ON THIS DEVICE ONLY'
                         }
@@ -298,6 +293,10 @@ export class Login2Component implements OnInit
                         if (result === true) {
                             this.loggedIn();
                             localStorage.removeItem(Shared.oneDeviceLogIn);
+                        }
+                        else if (result === undefined) {
+                            this.isDisabledLoginButton = false;
+                            localStorage.setItem(Shared.oneDeviceLogIn, 'true');
                         }
                         else {
                             this.isDisabledLoginButton = true;
@@ -353,7 +352,6 @@ export class Login2Component implements OnInit
                     localStorage.setItem(Shared.oneDeviceLogIn, 'true');
                     localStorage.removeItem(Shared.passwordCheck);
                     localStorage.removeItem(Shared.accountCreated);
-                    localStorage.removeItem(Shared.alreadyLoggedOutfromOtherDevice);
 
                     console.log('User has been updated with Id "' + updated.id + '"');
 

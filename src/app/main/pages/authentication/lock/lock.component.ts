@@ -109,17 +109,7 @@ export class LockComponent implements OnInit
 
         const snackBarRef = this.snackBar.open('Do you want to logout?', 'Yes, Logout', { duration: 5000 });
 
-        snackBarRef.onAction().subscribe(() => {
-            if (localStorage.getItem(Shared.alreadyLoggedOutfromOtherDevice) === 'true') {
-                setTimeout(() => {
-                    localStorage.removeItem(Shared.username);
-                    localStorage.removeItem(Shared.userId);
-                    this.router.navigate(['/']);
-                }, 500);
-                return;
-            }
-            this.logout();
-        });
+        snackBarRef.onAction().subscribe(() => { this.logout(); });
 
         snackBarRef.afterDismissed().subscribe(() => {
             this.logoutDisabled = false;
@@ -167,6 +157,9 @@ export class LockComponent implements OnInit
                 console.log(updated);
                 console.log('User with Id "' + updated.id + '" has been logged out!');
 
+                this.isShown = false;
+                this.logoutDisabled = true;
+
                 localStorage.setItem(Shared.userId, updated.id);
             }, 
             error => {
@@ -181,8 +174,8 @@ export class LockComponent implements OnInit
 
             // Drop this user
             this.loginService.removeUser().subscribe(() => {
+                localStorage.setItem(Shared.oneDeviceLogIn, 'true');
                 localStorage.removeItem(Shared.serverError);
-                localStorage.removeItem(Shared.oneDeviceLogIn);
                 localStorage.removeItem(Shared.username);
                 localStorage.removeItem(Shared.userId);
                 console.log('User deleted!');

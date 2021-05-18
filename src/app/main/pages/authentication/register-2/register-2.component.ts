@@ -142,7 +142,7 @@ export class Register2Component implements OnInit, OnDestroy
         const password = this.registerForm.value.password.trim();
         const phone = this.registerForm.value.phone.trim();
 
-        const capitalizeFirstLetter = username ? username.charAt(0).toUpperCase() + username.substr(1).toLowerCase() : '';
+        const capitalizeFirstLetterOfUsername = username ? username.charAt(0).toUpperCase() + username.substr(1).toLowerCase() : '';
 
         // Auto-generate Token for these requests!
         this.loginService.login({ username: 'Server', password: 'server21' }).subscribe(res => {
@@ -169,7 +169,7 @@ export class Register2Component implements OnInit, OnDestroy
 
             for (const item of data) {
                 this.userEmail = data.find((x: { email: any; }) => x.email === email);
-                this.userName = data.find((x: { username: any; }) => x.username === capitalizeFirstLetter);
+                this.userName = data.find((x: { username: any; }) => x.username === capitalizeFirstLetterOfUsername);
             }
 
             if (this.userEmail !== undefined) {
@@ -187,7 +187,7 @@ export class Register2Component implements OnInit, OnDestroy
             }
             else if (this.userName !== undefined) {
 
-                if (this.userName.username === capitalizeFirstLetter) {
+                if (this.userName.username === capitalizeFirstLetterOfUsername) {
                     this.isDisabledSubmitButton = true;
 
                     this.snackBar.open('Username "' + username + '" is in use by another account!', 'Ok').onAction().subscribe(() => {
@@ -205,7 +205,7 @@ export class Register2Component implements OnInit, OnDestroy
 
                 // Create new user
                 this._projectDashboardService.createTeam({
-                    username: capitalizeFirstLetter,
+                    username: capitalizeFirstLetterOfUsername,
                     email: email,
                     password: password,
                     loggedIn: false,
@@ -226,6 +226,12 @@ export class Register2Component implements OnInit, OnDestroy
                         localStorage.setItem('accountCreated', 'true');
                         localStorage.removeItem('registering');
                         localStorage.removeItem('createdIncomplete');
+
+                        if (localStorage.getItem(Shared.username) !== null && localStorage.getItem(Shared.username) !== capitalizeFirstLetterOfUsername) {
+                            // Navigate to dashboard
+                            this.router.navigate(['/apps/dashboards/project']);
+                            return;
+                        }
 
                         // Navigate to login
                         this.router.navigate(['/pages/auth/login-2']);

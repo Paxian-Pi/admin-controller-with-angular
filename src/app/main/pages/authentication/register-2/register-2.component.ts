@@ -228,6 +228,9 @@ export class Register2Component implements OnInit, OnDestroy
                         localStorage.removeItem('createdIncomplete');
 
                         if (localStorage.getItem(Shared.username) !== null && localStorage.getItem(Shared.username) !== capitalizeFirstLetterOfUsername) {
+                            localStorage.removeItem(Shared.passwordCheck);
+                            localStorage.removeItem(Shared.accountCreated);
+
                             // Navigate to dashboard
                             this.router.navigate(['/apps/dashboards/project']);
                             return;

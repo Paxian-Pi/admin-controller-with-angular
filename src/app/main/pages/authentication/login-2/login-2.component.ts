@@ -362,15 +362,17 @@ export class Login2Component implements OnInit
         }, error => {
                 console.log(error);
                 if (error.status === 403) {
-                    const snackBarRef = this.snackBar.open('Wrong credentials OR This account does not exist yet!', 'Register', { duration: 5000 });
-                    snackBarRef.onAction().subscribe(() => {
-                        this.router.navigate(['/pages/auth/register-2']);
+                    this.snackBar.open('Wrong credentials OR This account does not exist yet!', 'Register', { duration: 5000 })
+                        .onAction().subscribe(() => {
+                            localStorage.removeItem(Shared.username);
+                            this.router.navigate(['/pages/auth/register-2']);
                     });
                 }
             });
     }
 
-    cancleEventCheck() {
+    cancleRegEventCheck() {
+        localStorage.removeItem(Shared.username);
         localStorage.removeItem(Shared.passwordCheck);
         localStorage.removeItem(Shared.accountCreated);
     }
@@ -386,40 +388,5 @@ export class Login2Component implements OnInit
         }
 
         console.log(event);
-    }
-
-    logout() {
-        // Drop this user
-        this.loginService.removeUser().subscribe(() => {
-            console.log('User deleted!');
-
-        }, error => {
-            if (error.status === 403 || error.status === 500) {
-                localStorage.setItem(Shared.serverError, 'true');
-            }
-        });
-
-        if (localStorage.getItem(Shared.serverError) === 'true') {
-            return;
-        }
-
-        // Re-create the user with logged-in update
-        this.loginService.reCreateTeam({
-            username: localStorage.getItem(Shared.username),
-            email: localStorage.getItem(Shared.email),
-            password: localStorage.getItem(Shared.password),
-            loggedIn: false,
-            phone: localStorage.getItem(Shared.phone),
-            roles: localStorage.getItem(Shared.roles),
-            permissions: localStorage.getItem(Shared.permissions)
-        })
-        .subscribe((updated) => {
-            console.log('Re-created!');
-            console.log(updated);
-            console.log('User with Id "' + updated.id + '" has been logged out!');
-            localStorage.removeItem(Shared.serverError);
-
-            localStorage.setItem(Shared.userId, updated.id);
-        });
     }
 }
